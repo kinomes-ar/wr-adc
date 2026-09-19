@@ -466,6 +466,23 @@ _jp(TRAITS, {'dive':-2,'cc':-2,'tank':-1,'earlypress':-1,'poke':2,'immobile':2,'
 _jp(OURS, {'우리팀에 이니시·탱커 있음':2,'우리팀에 CC가 거의 없음':-2,'우리팀이 초반에 강함':1,'우리팀에 암살자·다이브 있음':1,'우리팀이 후반 조합':0},
  {'우리팀에 이니시·탱커 있음':'아군 CC가 진의 전제 조건이다','우리팀에 CC가 거의 없음':'CC가 없으면 진이 성립하지 않는다'});
 
+/* 진 공략 영상 반영 (KDU 와일드리프트 진 가이드) */
+(()=>{const set=(arr,k,v,w)=>{const x=arr.find(y=>(y.k||y.label)===k); if(x){x.s.jhin=v; if(w){x.why=x.why||{}; x.why.jhin=w;}}};
+ set(E_ADC,'미스포츈',2,'견제형 뚜벅이 원딜 — 공략이 진의 유리 매치업으로 분류');
+ set(E_ADC,'바루스',2,'견제형 뚜벅이 원딜 — 진이 버스트로 처벌한다');
+ set(E_ADC,'이즈리얼',2,'성장형 원딜 — 크기 전에 버스트로 끊는다');
+ set(E_ADC,'징크스',2,'성장형 원딜 — 크기 전에 버스트로 끊는다');
+ set(E_ADC,'베인',2,'성장형 원딜 — 크기 전에 버스트로 끊는다');
+ set(E_ADC,'애쉬',1,'견제형 뚜벅이 원딜 — 진이 상대하기 좋은 유형');
+ set(E_ADC,'케이틀린',0);
+ set(TRAITS,'tank',-2,'탱커형 챔프가 진의 명확한 약점 — 지속딜이 없어 못 녹인다');
+ set(TRAITS,'dive',-2,'암살자·강제 진입 챔프에 가장 약하다 (제드 피즈 렝가)');
+ const j=CHAMPS.find(c=>c.id==='jhin');
+ j.strength='성장형 원딜(징크스·이즈·베인)과 견제형 뚜벅이 원딜(미포·바루스)을 버스트로 처벌한다.';
+ j.weak='탱커형 챔프와 강제로 진입해오는 암살자에게 약하다. 야스오 바람장막·브라움 방어막은 궁(커튼콜)을 무력화한다.';
+ j.src='유튜브 공략(구버전 영상 — 매치업만 반영) + 통계 7.2e';
+})();
+
 const SEL={sup:null,eadc:null,esup:null,tr:new Set(),our:new Set()};
 const MULTI={tr:1,our:1};
 const $=s=>document.querySelector(s);
