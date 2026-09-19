@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WR 원딜 픽</title>
+<meta name="description" content="와일드리프트 원딜 픽 가이드 — 서폿·상대 조합별 단계 추천">
+<meta name="theme-color" content="#0B0E13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏹</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0B0E13;--card:#161B24;--card2:#1A212C;--line:#242C3A;--line2:#1B212C;
+ --tx:#E8ECF2;--dim:#8B96A8;--dim2:#69748A;--good:#4ADE80;--bad:#F87171;--warn:#F0B45E;--blue:#8FB9E8}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--tx);line-height:1.5;
+ font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+ -webkit-font-smoothing:antialiased;font-size:15px;
+ padding:0 max(14px,env(safe-area-inset-left)) calc(30px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-right))}
+.wrap{max-width:560px;margin:0 auto}
+
+header{padding:14px 0 10px;display:flex;align-items:baseline;gap:8px}
+h1{font-size:16px;font-weight:800;letter-spacing:-.02em}
+header span{font-size:10.5px;color:var(--dim2)}
+nav{display:flex;gap:5px;padding:5px 0 9px;position:sticky;top:0;background:var(--bg);z-index:30}
+nav button{flex:1;padding:9px 4px;border:1px solid var(--line);background:var(--card);color:var(--dim);
+ border-radius:9px;font-size:12.5px;font-weight:700;font-family:inherit}
+nav button.on{background:#213047;color:#fff;border-color:#3A5578}
+.panel{display:none}.panel.on{display:block}
+
+/* ── 추천 카드 ── */
+.hero{border:1px solid #2B4A38;background:linear-gradient(180deg,#132218,#101720);border-radius:14px;
+ padding:14px 15px;margin-bottom:12px}
+.hero .lbl{font-size:10px;font-weight:800;letter-spacing:.1em;color:#5EBF82;margin-bottom:6px}
+.hero .big{font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1.15}
+.hero .big em{font-style:normal;font-size:11px;font-weight:700;color:var(--warn);
+ border:1px solid #453520;border-radius:5px;padding:2px 6px;margin-left:8px;vertical-align:4px}
+.hero .sub{font-size:12px;color:#A8B6C6;margin-top:6px;line-height:1.55}
+.hero.warnbox{border-color:#5A3E1E;background:linear-gradient(180deg,#1E1710,#12151A)}
+.hero.warnbox .lbl{color:var(--warn)}
+.hero.badbox{border-color:#5A2A2E;background:linear-gradient(180deg,#1E1315,#12151A)}
+.hero.badbox .lbl{color:var(--bad)}
+.alts{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.alts b{font-size:11px;color:var(--dim2);font-weight:700;align-self:center}
+.alts span{font-size:12px;font-weight:700;background:#1A2430;border:1px solid var(--line);
+ border-radius:20px;padding:4px 10px;color:#C4D0DE}
+
+.hint{font-size:11.5px;color:var(--dim2);background:var(--card);border:1px dashed var(--line);
+ border-radius:10px;padding:9px 12px;margin-bottom:14px;line-height:1.55}
+.hint b{color:var(--blue);font-weight:700}
+
+/* ── 단계 ── */
+.step{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--card);overflow:hidden}
+.step>summary{padding:12px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;
+ cursor:pointer;list-style:none}
+.step>summary::-webkit-details-marker{display:none}
+.step>summary .n{width:19px;height:19px;border-radius:50%;background:#26313F;color:var(--dim);
+ font-size:10.5px;font-weight:800;display:grid;place-items:center;flex:0 0 auto}
+.step.done>summary .n{background:#1E4230;color:var(--good)}
+.step>summary .pick{margin-left:auto;font-size:12px;font-weight:700;color:var(--blue);
+ max-width:52%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+.step>summary .pick.none{color:var(--dim2);font-weight:500}
+.body{padding:0 12px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:7px 11px;border:1px solid var(--line);background:var(--card2);color:var(--dim);
+ border-radius:20px;font-size:12.5px;font-weight:600;font-family:inherit;line-height:1.25}
+.chip.on{background:#23405E;border-color:#4276AB;color:#EAF2FB}
+.chip small{display:block;font-size:9px;color:var(--dim2);font-weight:500;margin-top:2px}
+.chip.on small{color:#9FC0E0}
+.chip .ex{opacity:.75}
+.reset{width:100%;margin-top:12px;padding:11px;border:1px solid var(--line);background:none;
+ color:var(--dim2);border-radius:10px;font-size:12.5px;font-weight:700;font-family:inherit}
+
+/* ── 순위 ── */
+.rank{margin-top:14px}
+.rank>h3{font-size:11px;font-weight:800;color:var(--dim2);letter-spacing:.07em;margin-bottom:8px}
+.row{display:flex;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;
+ margin-bottom:6px;background:var(--card);align-items:flex-start}
+.row.no{opacity:.5}
+.rk{flex:0 0 18px;font-size:13px;font-weight:900;color:var(--dim2);padding-top:1px}
+.mid{flex:1;min-width:0}
+.nm{font-size:14px;font-weight:800}
+.nm .tier{font-size:9px;font-weight:800;color:var(--warn);border:1px solid #453520;
+ border-radius:4px;padding:1px 4px;margin-left:5px;vertical-align:1px}
+.rs{margin-top:5px;display:flex;flex-direction:column;gap:3px}
+.rs div{font-size:11px;line-height:1.45;color:var(--dim)}
+.rs b{font-weight:700;color:#A9B6C6}
+.rs .p{color:#8FD8AB}.rs .m{color:#E39B9B}
+.sc{flex:0 0 auto;font-size:13px;font-weight:900;padding-top:1px}
+.sc.p{color:var(--good)}.sc.m{color:var(--bad)}.sc.z{color:var(--dim2)}
+
+/* ── 치트 / 상세 ── */
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+td{padding:9px 5px;border-bottom:1px solid var(--line2);vertical-align:top}
+td.c{font-weight:900;font-size:13px;width:54px;white-space:nowrap}
+td.g{color:#8FD8AB;font-weight:600}td.r{color:#E39B9B;font-weight:600}
+.cd{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:8px;background:var(--card)}
+.cd h4{font-size:15px;font-weight:900}
+.cd h4 .tier{font-size:9px;font-weight:800;color:var(--warn);border:1px solid #453520;border-radius:4px;padding:1px 4px;margin-left:5px;vertical-align:2px}
+.cd .tag{font-size:11px;color:var(--blue);font-weight:600;margin:2px 0 9px}
+.cd dl{display:grid;grid-template-columns:46px 1fr;gap:5px 9px;font-size:11.5px}
+.cd dt{color:var(--dim2);font-weight:700}
+.cd dd{line-height:1.55}
+.cd ul{margin:0;padding-left:15px}
+.cd .wn{color:var(--bad);font-weight:700}
+.stat{font-size:10px;color:var(--dim2);margin-top:9px;border-top:1px solid var(--line2);padding-top:7px}
+.ftr{margin-top:18px;font-size:10px;color:#4E5766;line-height:1.7;border-top:1px solid var(--line2);padding-top:11px}
+</style>
+</head>
+<body><div class="wrap">
+
+<header><h1>WR 원딜 픽</h1><span>Patch 7.2e</span></header>
+<nav>
+  <button class="on" data-p="pick">픽 찾기</button>
+  <button data-p="sheet">치트시트</button>
+  <button data-p="champ">챔프 상세</button>
+</nav>
+
+<section class="panel on" id="p-pick">
+  <div id="hero"></div>
+  <div id="hint" class="hint"></div>
+
+  <details class="step" id="s-sup"><summary><span class="n">1</span>우리 서폿<span class="pick none">미선택</span></summary>
+    <div class="body"><div class="chips" id="c-sup"></div></div></details>
+  <details class="step" id="s-eadc"><summary><span class="n">2</span>상대 원딜<span class="pick none">미선택</span></summary>
+    <div class="body"><div class="chips" id="c-eadc"></div></div></details>
+  <details class="step" id="s-esup"><summary><span class="n">3</span>상대 서폿<span class="pick none">미선택</span></summary>
+    <div class="body"><div class="chips" id="c-esup"></div></div></details>
+  <details class="step" id="s-tr"><summary><span class="n">4</span>상대 조합<span class="pick none">미선택</span></summary>
+    <div class="body"><div class="chips" id="c-tr"></div></div></details>
+  <details class="step" id="s-our"><summary><span class="n">5</span>우리 조합<span class="pick none">미선택</span></summary>
+    <div class="body"><div class="chips" id="c-our"></div></div></details>
+
+  <button class="reset" id="reset">전부 초기화</button>
+  <div class="rank" id="rank"></div>
+</section>
+
+<section class="panel" id="p-sheet">
+  <table id="sheet"></table>
+  <div class="ftr">초록 = 확실히 켜지는 조건 / 빨강 = 확실히 꺼지는 조건. 충돌하면 상대 조합이 서폿보다 우선.</div>
+</section>
+
+<section class="panel" id="p-champ"><div id="champs"></div></section>
+
+<div class="ftr">근거: 챔피언 공략 영상 트랜스크립트(이즈리얼·베인·징크스·자야·루시안·애쉬·트위치) + 유나라 공략 + 통계(Wild Rift Core / wildriftmeta, Patch 7.2e). 근거가 없는 조합은 0(무난)으로 둔 것이지 검증된 값이 아님.</div>
+</div>
+
+<script>
+/* 와일드리프트 원딜 픽 가이드 — 데이터
+   근거: 공략 영상 트랜스크립트(이즈리얼/베인/징크스/자야/루시안/애쉬/트위치/유나라)
+        + 통계(Wild Rift Core, wildriftmeta, Patch 7.2e)
+   점수: 2=최적  1=좋음  0=무난  -1=비추  -2=금지
+*/
+
+const CHAMPS = [
+  { id:'yunara',  name:'유나라',   tier:'S',  wr:'51.6%', pick:'12.1%', ban:'12.4%',
+    tag:'하이퍼캐리 · 하이브리드',
+    core:'1~5렙은 참고 파밍, 이후 주도권. CC가 없는 대신 초월 상태에서 E가 대시로 바뀐다.',
+    strength:'풀 내 티어 최상위. 서폿 종류를 안 가리는 유일한 챔프.',
+    weak:'1~5렙이 약하고 CC가 전혀 없다. 초월 쿨 사이에 취약.',
+    spell:'방어막 + 점멸',
+    build:'공속 기반. 패시브가 치명타를 추가 마법 피해로 바꿔 방어 아이템을 우회한다.',
+    runes:'치명적 속도 / 정복자',
+    combo:['초월 켜고 W 관통 빔 → E 대시로 재포지션','룰루 공속 버프가 하이브리드 패시브를 직접 증폭'],
+    src:'통계 + 유튜브 공략' },
+
+  { id:'ezreal',  name:'이즈리얼', tier:'S',  wr:'50.1%', pick:'8.8%',  ban:'0.5%',
+    tag:'포킹 · 안전',
+    core:'E(비전 이동)는 진입기가 아니라 생존기. 상대 CC가 빠진 뒤에 쓴다.',
+    strength:'논타겟 CC를 E로 회피하고 역킬. 어떤 조합에서도 안 망한다.',
+    weak:'라인클리어가 약해 주도권이 없다. 라인을 받아먹으며 크는 챔프.',
+    spell:'회복 + 점멸 (서폿이 힐 들면 방어막)',
+    build:'마나문 → 삼위일체 또는 얼어붙은 건틀릿 → 몰왕검. AP 암살자 세면 멜모셔스.',
+    runes:'정복자 (현재 매우 효율적)',
+    combo:['W-평 / W-Q / W-E 로 표식 폭발','한타: R-W-평-Q-평-E (E를 마지막까지 아낌)','암살: 수풀에서 R-W-E-평-Q-평'],
+    tip:'Q는 치명타가 안 터진다 → 치명타템보다 적중 시 효과·스킬 가속템. Q 적중마다 다른 스킬 쿨이 준다.',
+    src:'유튜브 공략' },
+
+  { id:'lucian',  name:'루시안',   tier:'A',  wr:'—', pick:'—', ban:'—',
+    tag:'초반 주도권 · 딜링',
+    core:'패시브가 평타를 2번 때린다 → 온힛·치명타가 2배. E 쿨이 평타로 깎인다.',
+    strength:'초반 라인전이 매우 강하다. 성장형 원딜을 초반에 부순다.',
+    weak:'CC가 하나도 없고 사거리가 짧다. 초반 이득을 못 보면 후반에 무너진다.',
+    spell:'방어막 + 점멸 (서폿이 힐 없으면 회복)',
+    build:'마나문(안정) / 몰왕검(초반 주도권) / 삼위일체 중 택1 → 2코어 속사포',
+    runes:'정복자 (패시브 덕에 스택이 빨리 참). 상대 견제 세면 재생의 바람.',
+    combo:['E-평-Q-평-W-평-E-평 (E 쿨 리셋 루프)','미니언 통해 Q-E-평-W-평','E-W-점멸-평-Q-평-R'],
+    tip:'평타 1대당 E 쿨 1초 감소인데 패시브가 2번 때려 2초, 챔프 대상이면 추가 2초 = 총 4초. 스킬 사이에 평타를 꼭 끼워라.',
+    src:'유튜브 공략' },
+
+  { id:'ashe',    name:'애쉬',     tier:'A',  wr:'—', pick:'—', ban:'—',
+    tag:'견제 · 유틸 · CC',
+    core:'평타 데미지는 치명타든 아니든 같다. 치명타 확률은 둔화된 적에게 주는 추가 피해를 키운다.',
+    strength:'성장형 원딜 전부를 견제로 누른다. R로 한타 시작권을 가져온다.',
+    weak:'대시가 아예 없다. 물리면 죽는다. 아이템 의존도가 높다.',
+    spell:'방어막 + 점멸 (서폿이 힐 없으면 회복)',
+    build:'몰왕검 1코어(안정) 또는 정수약탈자·마나문(쿨감+견제) → 삼위일체 / 솔라리 충전검',
+    runes:'정복자 / 약화(아군 딜 증폭) / 콩콩이·생명의 샘',
+    combo:['W-평 / 평-W-평 (모션 캔슬)','평-Q-평','R-평-Q-평-W-평'],
+    tip:'W 마스터 먼저. W는 챔피언에게 무조건 치명타 → 둔화 2배. 한 명에게 여러 발 맞아도 딜은 1회만 들어가니 각도를 틀어 여러 명에게. 히트앤런 하지 말고 최소 두 대 치고 빠질 것.',
+    src:'유튜브 공략' },
+
+  { id:'vayne',   name:'베인',     tier:'S',  wr:'49.6%', pick:'6.4%', ban:'8.5%',
+    tag:'탱커 킬러 · 후반',
+    core:'W 은화살 3스택이 최대 체력 비례 고정 피해. 타겟을 바꾸면 스택이 초기화된다.',
+    strength:'탱커가 많을수록 강해진다. W 액티브로 공속 3배 + 회복.',
+    weak:'사거리가 짧고 광역딜이 없어 라인클리어가 느리다. 장거리 견제가 없다.',
+    spell:'탈진 + 점멸 (사거리 짧아 암살자 대응)',
+    build:'몰왕검 → 위츠엔드·유령무희 등 공속템',
+    runes:'크라켄 학살자(W 시너지) / 치명적 속도',
+    combo:['평-Q-평 (모션 캔슬)','평-평-E 로 표식 터뜨리기','R-Q-평-W-평 (궁 중 Q는 은신)'],
+    tip:'Q는 회피기지 도주기가 아니다 — 벽을 못 넘고, Q 쓰고 평타를 안 때리면 쿨이 안 돈다. E는 즉발이 아니라 점멸 연계·채널링 차단이 된다. 궁 중 킬/어시마다 지속시간 4초 연장.',
+    src:'유튜브 공략' },
+
+  { id:'jinx',    name:'징크스',   tier:'B',  wr:'—', pick:'—', ban:'—',
+    tag:'후반 캐리 · 스노우볼',
+    core:'미니건(공속 스택)과 로켓런처(사거리·광역)를 상황마다 바꿔 쓴다.',
+    strength:'패시브가 터지면 공속 상한 2.5를 뚫는다. 후반 한타 화력이 폭발.',
+    weak:'이동기가 전혀 없다. 한 번 물리면 끝. 아이템 의존도가 높다.',
+    spell:'회복 + 점멸 (서폿이 힐 들면 방어막)',
+    build:'몰왕검 1코어(약한 타이밍 보완) → 치명타템 / 룬안의 폭풍(로켓 광역 시너지)',
+    runes:'정복자(딜) / 기민한 발놀림(안정)',
+    combo:['평-W-평 / 평-R-평 (모션 캔슬)','W-E-평평평-Q-평평-R-평'],
+    tip:'Q 마스터 먼저 — 로켓 사거리가 같이 늘어난다. 미니건 공속 버프는 로켓 전환 후 첫 평타에만 적용되니 평평평-Q-평-Q-평평평 식으로 끊어 쓸 것. E는 스테이시스를 깨고, 급할 땐 조준 없이 발밑에.',
+    src:'유튜브 공략' },
+
+  { id:'xayah',   name:'자야',     tier:'A',  wr:'—', pick:'—', ban:'—',
+    tag:'받아치기 · 한타 생존',
+    core:'스킬로 깃털을 적립하고 평타로 뿌린 뒤 E로 회수. 3개 이상 맞으면 속박.',
+    strength:'R로 논타겟 무적. CC 중에도 사용 가능하고 궁 중 이동·점멸이 된다.',
+    weak:'사거리가 짧아 포지셔닝이 어렵다. 먼저 판을 만들지 못하고 받아치는 챔프.',
+    spell:'탈진 + 점멸 (사거리 짧음)',
+    build:'폭풍갈퀴 → 나보리 등 치명타템. 상대가 계속 파고들면 속사포.',
+    runes:'치명적 속도(깃털 빨리 뿌리기) / 정복자',
+    combo:['2렙 Q-평-E 로 즉시 속박','W-평-Q-E','R-Q-평-E'],
+    tip:'스킬만 연달아 쓰지 말고 평타를 섞어야 깃털이 깔린다. 적 위치가 아니라 깃털 위치를 보고 각을 잰다. 깃털은 벽을 뚫는다. 관통할수록 딜 감소(앞 73 / 뒤 37).',
+    src:'유튜브 공략' },
+
+  { id:'twitch',  name:'트위치',   tier:'C',  wr:'—', pick:'—', ban:'—',
+    tag:'지속딜 · 은신',
+    core:'패시브 맹독 5스택이면 초당 피해가 5배. 은신을 푼 뒤 3초간 평타마다 2스택씩 쌓인다.',
+    strength:'고정 피해라 탱커에게 강하다. 궁이 관통 + 사거리 대폭 증가.',
+    weak:'궁 빼면 사거리가 짧고 원거리 견제기가 없다. 라인 주도권이 서폿에 달려 있다.',
+    spell:'탈진 + 점멸 (진입 챔프 대응)',
+    build:'적중 시 추가 효과 아이템 위주, 또는 치명타템. 룬안의 허리케인은 사실상 전용템.',
+    runes:'치명적 속도(스택 빨리) / 정복자',
+    combo:['Q-W-평평평 (은신 급습 + 스택)','W-평평평-E (아군 진입 호응)','Q-R-W-평평-E (광역)'],
+    tip:'궁은 관통 1회당 딜 10% 감소(최대 60%) — 미니언을 뚫고 쏘면 오히려 약해진다. 적 챔프에게 패시브를 바르면 포탑 어그로가 끌린다. 5스택이면 공속 +30%.',
+    warn:'현재 패치 티어 최하위.',
+    src:'유튜브 공략' },
+];
+
+/* ---------- 우리 서폿 ---------- */
+const SUPPORTS = [
+  { k:'룰루', type:'엔챈터 · 보호', s:{yunara:2,lucian:2,jinx:2,vayne:1,ashe:1,ezreal:1,xayah:0,twitch:1},
+    why:{yunara:'공속 버프가 하이브리드 패시브를 직접 증폭 + 변이로 CC 공백을 메움',lucian:'평타 강화 → 패시브 2회 타격이 2배로 이득',jinx:'징크스가 요구하는 보호형 서폿'} },
+  { k:'나미', type:'엔챈터 · 보호', s:{lucian:2,yunara:2,ezreal:2,jinx:1,vayne:1,ashe:1,xayah:0,twitch:1},
+    why:{lucian:'평타 강화 서폿 — 루시안 최고 궁합',yunara:'평타 강화 + 카이팅',ezreal:'엔챈터와 궁합 좋음'} },
+  { k:'잔나', type:'엔챈터 · 보호', s:{lucian:2,yunara:1,ezreal:1,jinx:2,vayne:1,ashe:1,xayah:0,twitch:1},
+    why:{lucian:'평타 강화 서폿',jinx:'돌진 차단'} },
+  { k:'카르마', type:'엔챈터', s:{yunara:2,ezreal:2,lucian:1,jinx:1,vayne:0,ashe:1,xayah:0,twitch:0},
+    why:{yunara:'보호막 유틸 + 초반 라인전 보완'} },
+  { k:'밀리오', type:'보호', s:{yunara:2,jinx:2,vayne:1,ashe:1,ezreal:1,lucian:0,xayah:0,twitch:1},
+    why:{yunara:'평타 사거리 증가 + 하이퍼캐리 강화',jinx:'징크스 필수 조건인 보호형'} },
+  { k:'브라움', type:'보호 · 이니시', s:{lucian:2,yunara:2,jinx:2,vayne:1,ashe:1,twitch:1,ezreal:0,xayah:0},
+    why:{lucian:'패시브 표식이 2배로 쌓임 — 효율 최상',yunara:'빠른 공속으로 표식 연계'} },
+  { k:'쓰레쉬', type:'이니시 + 보호', s:{yunara:2,jinx:2,vayne:2,ashe:1,xayah:1,lucian:1,twitch:1,ezreal:0},
+    why:{yunara:'변수가 풀린 타이밍에 안전하게 세이브',jinx:'E 지뢰를 갈고리에 연계해 공격적 운영',vayne:'붙어 싸우는 베인을 받쳐줌'} },
+  { k:'레오나', type:'하드 이니시', s:{yunara:2,vayne:2,lucian:2,twitch:1,xayah:1,ezreal:0,ashe:-2,jinx:-2},
+    why:{yunara:'하드 CC로 프리딜 구도 생성',vayne:'묶어주면 베인이 붙어서 W 스택을 쌓을 시간이 생긴다',lucian:'CC로 만든 창에 초반 폭딜을 몰아넣는다',ashe:'대시가 없는데 지켜줄 수단이 없다',jinx:'물리면 이동기가 없다'} },
+  { k:'노틸러스', type:'하드 이니시', s:{yunara:2,vayne:2,lucian:1,twitch:1,xayah:1,ezreal:0,ashe:-2,jinx:-2},
+    why:{yunara:'타겟팅 궁으로 확정 이니시 및 진입 차단',vayne:'베인 공략 실전이 전부 노틸 조합이었다',ashe:'지켜줄 수단이 없다',jinx:'물리면 이동기가 없다'} },
+  { k:'알리스타', type:'하드 이니시', s:{yunara:2,vayne:2,lucian:1,twitch:1,xayah:0,ezreal:0,ashe:-2,jinx:-2},
+    why:{yunara:'연계 CC로 프리딜',vayne:'근접 교전 공간을 열어준다',ashe:'지켜줄 수단이 없다',jinx:'이동기 없는 챔프에 이니시 서폿은 금지'} },
+  { k:'라칸', type:'이니시', s:{xayah:2,lucian:1,yunara:1,vayne:1,ezreal:0,ashe:-1,jinx:-1,twitch:0},
+    why:{xayah:'W 공속·이속을 서로 공유하는 전용 시너지'} },
+  { k:'블리츠크랭크', type:'그랩', s:{lucian:1,yunara:1,vayne:1,xayah:1,twitch:1,ezreal:0,ashe:-1,jinx:-2},
+    why:{jinx:'그랩 서폿과는 라인이 밀려 위험해진다'} },
+  { k:'파이크', type:'로밍 · 그랩', s:{lucian:1,yunara:1,vayne:1,xayah:1,ezreal:0,twitch:1,ashe:-1,jinx:-2}, why:{} },
+  { k:'모르가나', type:'유틸', s:{ezreal:1,yunara:1,jinx:1,ashe:1,xayah:0,vayne:0,lucian:0,twitch:0}, why:{} },
+  { k:'소라카', type:'힐 · 보호', s:{jinx:2,yunara:1,ashe:1,vayne:1,ezreal:1,twitch:1,lucian:0,xayah:0},
+    why:{jinx:'보호형이라 징크스 조건 충족'} },
+  { k:'유미', type:'엔챈터', s:{ezreal:2,yunara:1,jinx:1,vayne:1,ashe:0,lucian:0,xayah:0,twitch:1}, why:{} },
+  { k:'세라핀', type:'포킹 · 유틸', s:{ezreal:1,yunara:1,jinx:1,ashe:1,xayah:0,vayne:0,lucian:0,twitch:0}, why:{} },
+  { k:'룩스', type:'포킹 · CC', s:{ezreal:1,lucian:1,yunara:1,ashe:1,jinx:1,xayah:0,vayne:0,twitch:0}, why:{} },
+  { k:'자르반', type:'딜 서폿', s:{lucian:2,ezreal:1,yunara:0,vayne:0,xayah:0,ashe:0,twitch:-1,jinx:-2},
+    why:{lucian:'딜을 합쳐 2대2를 터뜨리는 구도',jinx:'보호가 전혀 없어 금지'} },
+  { k:'판테온', type:'딜 서폿', s:{lucian:2,ezreal:1,yunara:0,vayne:0,xayah:0,ashe:0,twitch:-1,jinx:-2},
+    why:{lucian:'초반 2대2 화력을 합친다',jinx:'보호 수단이 전혀 없어 금지'} },
+  { k:'세나', type:'딜 서폿', s:{lucian:1,ezreal:1,yunara:0,ashe:0,xayah:0,vayne:0,jinx:-1,twitch:-1}, why:{} },
+];
+
+/* ---------- 상대 원딜 ---------- */
+const E_ADC = [
+  { k:'애쉬', ban:true, s:{yunara:-2,ezreal:-2,lucian:-2,vayne:-1,jinx:-1,xayah:-1,twitch:-1,ashe:0},
+    why:{yunara:'유나라 하드 카운터',ezreal:'빠른 라인클리어로 이즈를 밀어붙인다',lucian:'사거리가 더 길어 루시안을 괴롭힌다',xayah:'사거리 길고 CC 있음'},
+    note:'네 풀 전체가 구조적으로 불리 — 밴 1순위. 굳이 고르면 자야.' },
+  { k:'드레이븐', ban:true, s:{yunara:-2,ezreal:-2,vayne:-1,jinx:-2,xayah:0,twitch:-2,lucian:0,ashe:0},
+    why:{ezreal:'강한 라인전으로 이즈 성장을 방해',jinx:'초반 압박에 징크스가 무너짐'},
+    note:'라인전 최강급. 밴 후보.' },
+  { k:'미스포츈', s:{yunara:-2,ezreal:-2,lucian:-2,jinx:-1,vayne:-1,twitch:-1,xayah:1,ashe:0},
+    why:{lucian:'딜이 루시안만큼 세다',xayah:'자야는 거리 관리하면 해볼 만하다'} },
+  { k:'트리스타나', s:{yunara:-2,ezreal:-2,lucian:-2,jinx:-1,twitch:-1,vayne:0,xayah:0,ashe:0},
+    why:{ezreal:'빠른 라인클리어로 밀어붙임',lucian:'후반으로 갈수록 사거리가 더 길어진다'} },
+  { k:'케이틀린', s:{yunara:-2,xayah:-2,ezreal:-1,jinx:-1,twitch:-1,vayne:0,lucian:0,ashe:0},
+    why:{xayah:'사거리가 길어 수비적으로 가면 압박당한다'} },
+  { k:'진', s:{ezreal:-2,yunara:-1,twitch:-1,jinx:0,vayne:0,xayah:0,lucian:0,ashe:0},
+    why:{ezreal:'빠른 라인클리어로 라인을 밀고 다른 라인에 영향'} },
+  { k:'이즈리얼', s:{yunara:2,lucian:2,ashe:2,vayne:1,xayah:0,jinx:0,twitch:0,ezreal:0},
+    why:{yunara:'스킬 의존 원딜에 유나라가 강하다',lucian:'성장형이라 초반에 부순다',ashe:'성장형을 견제로 누른다'} },
+  { k:'카이사', s:{yunara:2,lucian:2,ashe:2,jinx:1,vayne:1,xayah:1,twitch:0,ezreal:0},
+    why:{jinx:'짧은 사거리라 로켓런처로 주도권',xayah:'사거리 짧은 상대 앞에 깃털을 깔기 좋다'} },
+  { k:'바루스', s:{yunara:2,ashe:1,lucian:1,vayne:0,ezreal:0,jinx:0,xayah:0,twitch:0},
+    why:{yunara:'스킬 비중 높은 원딜'} },
+  { k:'사미라', s:{yunara:2,xayah:1,ashe:1,lucian:0,ezreal:0,vayne:0,jinx:0,twitch:0},
+    why:{yunara:'사거리 짧은 원딜'} },
+  { k:'칼리스타', s:{yunara:2,ashe:1,lucian:0,ezreal:0,vayne:0,jinx:0,xayah:0,twitch:0}, why:{} },
+  { k:'베인', s:{lucian:2,ezreal:2,ashe:2,yunara:0,jinx:0,xayah:0,twitch:0,vayne:0},
+    why:{ezreal:'라인에서 이즈를 누르지 못한다',lucian:'성장형이라 초반에 부순다'} },
+  { k:'징크스', s:{lucian:2,ashe:2,yunara:1,ezreal:0,vayne:0,xayah:0,twitch:0,jinx:0},
+    why:{lucian:'성장형 — 초반에 부순다'} },
+  { k:'루시안', s:{yunara:-2,ezreal:0,ashe:1,vayne:0,xayah:0,jinx:-1,twitch:-1,lucian:0},
+    why:{yunara:'라인전 견제가 강력해 유나라가 힘들다',ashe:'사거리로 루시안을 괴롭힌다'} },
+  { k:'유나라', s:{ashe:1,lucian:1,ezreal:-1,vayne:0,xayah:0,jinx:0,twitch:0,yunara:0},
+    why:{ezreal:'유나라가 스킬 의존 원딜에 강하다'} },
+  { k:'코르키', s:{yunara:1,ashe:1,lucian:1,vayne:0,ezreal:0,jinx:0,xayah:0,twitch:0}, why:{} },
+  { k:'트위치', s:{lucian:2,ashe:2,yunara:1,ezreal:0,vayne:0,xayah:0,jinx:0,twitch:0}, why:{} },
+  { k:'스몰더', s:{lucian:2,ashe:1,yunara:1,ezreal:0,vayne:0,xayah:0,jinx:0,twitch:0},
+    why:{lucian:'스택 쌓기 전 초반이 비어 있다'} },
+  { k:'자야', s:{ezreal:2,lucian:1,ashe:1,yunara:0,vayne:0,jinx:0,xayah:0,twitch:0},
+    why:{ezreal:'사거리가 길지 않고 성장이 필요해 이즈를 못 누른다'} },
+  { k:'세나', s:{lucian:1,yunara:1,ashe:1,ezreal:0,vayne:0,xayah:0,jinx:0,twitch:0}, why:{} },
+];
+
+/* ---------- 상대 서폿 ---------- */
+const E_SUP = [
+  { k:'브라움', s:{ezreal:-2,vayne:-2,lucian:-2,xayah:-1,jinx:0,ashe:0,yunara:0,twitch:-1},
+    why:{ezreal:'투사체를 막아버린다',vayne:'방어막이 베인 평타를 막는다',lucian:'루시안 딜을 흘려버린다'} },
+  { k:'야스오', s:{ezreal:-2,xayah:-1,ashe:-1,vayne:0,lucian:0,yunara:0,jinx:0,twitch:0},
+    why:{ezreal:'바람장막이 투사체를 막는다'} },
+  { k:'블리츠크랭크', s:{jinx:-2,twitch:-1,vayne:-1,ashe:-1,xayah:0,yunara:0,lucian:0,ezreal:1},
+    why:{jinx:'그랩에 물리면 이동기가 없어 즉사',ezreal:'E로 그랩을 회피하고 역킬 가능'} },
+  { k:'알리스타', s:{jinx:-2,lucian:-2,ashe:-1,twitch:-1,vayne:0,yunara:0,xayah:0,ezreal:0},
+    why:{lucian:'확정 CC로 루시안이 위축된다',jinx:'돌진 + CC 조합에 징크스 금지'} },
+  { k:'레오나', s:{jinx:-2,lucian:-2,ashe:-1,twitch:-1,vayne:0,yunara:0,xayah:0,ezreal:0},
+    why:{lucian:'확정 CC에 취약'} },
+  { k:'쓰레쉬', s:{jinx:-1,ashe:-1,twitch:-1,lucian:0,vayne:0,yunara:0,xayah:0,ezreal:0}, why:{} },
+  { k:'노틸러스', s:{jinx:-2,ashe:-1,twitch:-1,lucian:-1,vayne:0,yunara:0,xayah:0,ezreal:0}, why:{} },
+  { k:'파이크', s:{jinx:-2,ashe:-2,twitch:-1,vayne:-1,lucian:0,yunara:0,xayah:1,ezreal:1},
+    why:{ashe:'진입형 암살자에 애쉬는 대응이 안 된다',xayah:'들어오는 적을 받아치기 좋다',ezreal:'E로 회피'} },
+  { k:'룩스', s:{ezreal:2,yunara:0,lucian:0,ashe:-1,jinx:-1,vayne:0,xayah:0,twitch:0},
+    why:{ezreal:'속박을 E로 회피하고 역킬'} },
+  { k:'아리', s:{ezreal:2,yunara:0,lucian:0,ashe:-1,jinx:-1,vayne:0,xayah:0,twitch:0},
+    why:{ezreal:'매혹을 E로 회피하고 역킬'} },
+  { k:'모르가나', s:{ezreal:1,jinx:-1,ashe:-1,twitch:-1,yunara:0,lucian:0,vayne:0,xayah:0}, why:{} },
+  { k:'나미', s:{yunara:0,lucian:0,ezreal:0,ashe:0,jinx:0,vayne:0,xayah:0,twitch:0}, why:{} },
+  { k:'룰루', s:{yunara:0,lucian:0,ezreal:0,ashe:0,jinx:0,vayne:0,xayah:0,twitch:0}, why:{} },
+  { k:'소라카', s:{lucian:1,vayne:1,yunara:0,ezreal:0,ashe:0,jinx:0,xayah:0,twitch:0}, why:{} },
+  { k:'세라핀', s:{ezreal:-1,yunara:0,jinx:0,ashe:0,lucian:0,vayne:0,xayah:0,twitch:0},
+    why:{ezreal:'라인을 계속 밀어붙이는 견제형'} },
+];
+
+/* ---------- 상대 조합 특성 ---------- */
+const TRAITS = [
+  { k:'dive',     label:'돌진 · 암살자 다수', ex:'리신 카밀 자르반 카타리나 렝가',
+    s:{ezreal:2,xayah:2,yunara:0,lucian:-1,jinx:-2,ashe:-2,vayne:-1,twitch:-2},
+    why:{ezreal:'E 순간이동으로 빠진다',xayah:'R 무적으로 받아친다',ashe:'대시가 없어 물리면 죽는다',jinx:'이동기가 전혀 없다'} },
+  { k:'tank',     label:'탱커 2명 이상', ex:'오른 말파이트 문도 뽀삐',
+    s:{vayne:2,twitch:2,jinx:1,ashe:0,yunara:1,xayah:0,ezreal:-1,lucian:-2},
+    why:{vayne:'W가 최대 체력 비례 고정 피해',twitch:'패시브가 고정 피해',lucian:'탱커를 못 녹인다'} },
+  { k:'poke',     label:'포킹 조합', ex:'제라스 케이틀린 바루스 세라핀',
+    s:{ezreal:2,ashe:2,yunara:0,jinx:0,xayah:-1,vayne:-1,lucian:0,twitch:-1},
+    why:{ashe:'W 둔화로 거리 유지',ezreal:'사거리 대응'} },
+  { k:'teamfight',label:'뭉쳐서 한타 거는 조합', ex:'오른 말파이트 아무무 세주아니',
+    s:{ashe:2,xayah:2,jinx:1,yunara:1,twitch:1,ezreal:0,vayne:0,lucian:-1},
+    why:{ashe:'R 선타로 한타 시작권을 뺏는다',xayah:'R로 광역 생존'} },
+  { k:'cc',       label:'광역 CC 많음', ex:'말파이트 아무무 오리아나 모르가나',
+    s:{ezreal:1,xayah:2,yunara:0,lucian:-1,vayne:-1,jinx:-2,ashe:-2,twitch:-2},
+    why:{xayah:'R은 CC 중에도 쓸 수 있다',ashe:'광역 CC에 대응이 안 된다'} },
+  { k:'immobile', label:'이동기 없는 챔프 위주', ex:'가렌 다리우스 애니 소라카',
+    s:{ezreal:2,ashe:2,vayne:2,lucian:1,yunara:1,twitch:2,jinx:1,xayah:0},
+    why:{ezreal:'Q 딜교가 일방적',ashe:'둔화로 계속 이득',vayne:'패시브 이속으로 우위'} },
+  { k:'earlypress',label:'초반 압박이 강한 조합', ex:'드레이븐 판테온 리신 렉사이',
+    s:{lucian:1,ashe:0,xayah:0,ezreal:-2,yunara:-2,jinx:-2,vayne:-1,twitch:-2},
+    why:{lucian:'초반에 맞받을 수 있는 유일한 카드',yunara:'1~5렙이 약하다',ezreal:'라인 주도권이 없다'} },
+  { k:'scaling',  label:'성장형 위주 (후반 조합)', ex:'베인 카이사 나서스 케일',
+    s:{lucian:2,ashe:2,yunara:1,jinx:0,ezreal:0,xayah:0,vayne:0,twitch:0},
+    why:{lucian:'초반에 부수고 빨리 끝낸다',ashe:'견제로 성장을 막는다'} },
+];
+
+const SCORE_LABEL = { 2:'최적', 1:'좋음', 0:'무난', '-1':'비추', '-2':'금지' };
+
+/* ---------- 우리 조합 ---------- */
+const OURS = [
+  { k:'우리팀에 이니시·탱커 있음', ex:'오른 레오나 아무무 세주아니',
+    s:{jinx:2,vayne:2,twitch:2,yunara:1,ashe:1,xayah:0,ezreal:0,lucian:0},
+    why:{jinx:'지켜주는 앞라인이 있으면 징크스 조건이 충족된다',vayne:'붙어 싸울 공간이 생긴다',twitch:'주도권을 팀이 만들어준다'} },
+  { k:'우리팀에 CC가 거의 없음', ex:'딜러 위주 조합',
+    s:{ashe:2,xayah:1,jinx:1,yunara:0,vayne:0,ezreal:0,twitch:0,lucian:-1},
+    why:{ashe:'R로 한타 시작권과 확정 CC를 혼자 만든다',lucian:'루시안도 CC가 없어 판을 굳힐 수단이 사라진다'} },
+  { k:'우리팀이 초반에 강함', ex:'리신 판테온 드레이븐',
+    s:{lucian:2,yunara:0,ashe:1,ezreal:-1,jinx:-1,twitch:-1,vayne:0,xayah:0},
+    why:{lucian:'초반 스노우볼에 같이 올라탄다',ezreal:'혼자 후반을 보면 템포가 안 맞는다'} },
+  { k:'우리팀이 후반 조합', ex:'케일 나서스 베이가',
+    s:{jinx:2,vayne:1,twitch:1,ezreal:1,yunara:1,ashe:0,xayah:0,lucian:-2},
+    why:{jinx:'같이 커서 한타로 끝낸다',lucian:'루시안은 후반에 무너져 조합과 어긋난다'} },
+  { k:'우리팀에 암살자·다이브 있음', ex:'카타리나 리신 이블린',
+    s:{ashe:2,lucian:1,ezreal:1,yunara:0,xayah:0,vayne:0,jinx:0,twitch:1},
+    why:{ashe:'R 선타로 암살 각을 열어준다',twitch:'은신으로 같이 측면 진입'} },
+];
+
+/* ---------- 1픽 / 블라인드 ---------- */
+const BLIND = [
+  { id:'ezreal', why:'어떤 조합에서도 안 망한다. E로 빠질 수단이 있어 최악의 상황이 안 나옴. 대신 라인 주도권은 포기.' },
+  { id:'yunara', why:'티어상 네 풀 최강이고 서폿을 안 가린다. 단 밴률 12%라 자주 잘리고, 애쉬·드레이븐·미포가 뒤에 나오면 불리해진다.' },
+  { id:'xayah', why:'R 무적이라 상대가 뭘 뽑든 죽을 각이 줄어든다. 받아치는 챔프라 판을 먼저 만들진 못함.' },
+];
+
+
+const SEL={sup:null,eadc:null,esup:null,tr:new Set(),our:new Set()};
+const MULTI={tr:1,our:1};
+const $=s=>document.querySelector(s);
+const byId=id=>CHAMPS.find(c=>c.id===id);
+
+const SRC={sup:SUPPORTS,eadc:E_ADC,esup:E_SUP,tr:TRAITS,our:OURS};
+const LBL={sup:s=>s.k,eadc:s=>s.k+(s.ban?' ⚠':''),esup:s=>s.k,tr:t=>t.label,our:o=>o.k};
+const SUB={sup:s=>s.type,eadc:()=>'',esup:()=>'',tr:t=>t.ex,our:o=>o.ex};
+
+Object.keys(SRC).forEach(k=>{
+  $('#c-'+k).innerHTML = SRC[k].map((it,i)=>{
+    const sb=SUB[k](it);
+    return `<button class="chip" data-k="${k}" data-i="${i}">${LBL[k](it)}${sb?`<small class="ex">${sb}</small>`:''}</button>`;
+  }).join('');
+});
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  const k=b.dataset.k,i=+b.dataset.i;
+  if(MULTI[k]){ SEL[k].has(i)?SEL[k].delete(i):SEL[k].add(i); b.classList.toggle('on'); }
+  else{
+    const same=SEL[k]===i;
+    document.querySelectorAll(`.chip[data-k="${k}"]`).forEach(x=>x.classList.remove('on'));
+    SEL[k]=same?null:i; if(!same){b.classList.add('on'); $('#s-'+k).open=false;}
+  }
+  render();
+});
+$('#reset').onclick=()=>{
+  SEL.sup=SEL.eadc=SEL.esup=null; SEL.tr.clear(); SEL.our.clear();
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.step').forEach(x=>x.open=false);
+  render();
+};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); $('#p-'+b.dataset.p).classList.add('on'); scrollTo(0,0);
+});
+
+function active(){
+  const a=[];
+  if(SEL.sup!=null) a.push(['우리 ',SUPPORTS[SEL.sup]]);
+  if(SEL.eadc!=null) a.push(['상대 ',E_ADC[SEL.eadc]]);
+  if(SEL.esup!=null) a.push(['상대 ',E_SUP[SEL.esup]]);
+  SEL.tr.forEach(i=>a.push(['',TRAITS[i]]));
+  SEL.our.forEach(i=>a.push(['',OURS[i]]));
+  return a;
+}
+function evaluate(){
+  const A=active();
+  return CHAMPS.map(c=>{
+    let sc=0; const rs=[];
+    A.forEach(([pre,src])=>{
+      const v=src.s?.[c.id]; if(v===undefined) return;
+      sc+=v; const w=src.why?.[c.id];
+      if(v!==0||w) rs.push({v,t:`<b>${pre}${src.k||src.label}</b>${w?' — '+w:''}`});
+    });
+    return {c,sc,rs};
+  }).sort((a,b)=>b.sc-a.sc||CHAMPS.indexOf(a.c)-CHAMPS.indexOf(b.c));
+}
+
+const STEPS=[['sup','우리 서폿'],['eadc','상대 원딜'],['esup','상대 서폿'],['tr','상대 조합'],['our','우리 조합']];
+function syncSteps(){
+  STEPS.forEach(([k,name])=>{
+    const el=$('#s-'+k), p=el.querySelector('.pick');
+    let txt='';
+    if(MULTI[k]) txt=[...SEL[k]].map(i=>(k==='tr'?TRAITS[i].label:OURS[i].k)).join(', ');
+    else if(SEL[k]!=null) txt=SRC[k][SEL[k]].k;
+    el.classList.toggle('done',!!txt);
+    p.textContent=txt||'미선택'; p.classList.toggle('none',!txt);
+  });
+}
+function nextHint(){
+  const order=[['sup','우리 서폿이 뭔지'],['eadc','상대 원딜'],['esup','상대 서폿'],['tr','상대 조합 특성'],['our','우리 조합 특성']];
+  const left=order.filter(([k])=>MULTI[k]?SEL[k].size===0:SEL[k]==null);
+  if(!left.length) return '입력할 수 있는 건 다 넣었다. 위 추천이 최종 판단.';
+  return `다음에 <b>${left[0][1]}</b>가 정해지면 더 좁혀진다. 모르면 건너뛰어도 됨.`;
+}
+
+function render(){
+  syncSteps();
+  const A=active(), list=evaluate();
+  const warn = SEL.eadc!=null && E_ADC[SEL.eadc].ban ? E_ADC[SEL.eadc] : null;
+
+  /* 1픽 / 정보 없음 */
+  if(!A.length){
+    const b=BLIND.map(x=>({c:byId(x.id),why:x.why}));
+    $('#hero').innerHTML = `<div class="hero"><div class="lbl">1픽 · 정보 없을 때</div>
+      <div class="big">${b[0].c.name}<em>${b[0].c.tier}</em></div>
+      <div class="sub">${b[0].why}</div>
+      <div class="alts"><b>대안</b>${b.slice(1).map(x=>`<span>${x.c.name}</span>`).join('')}</div></div>`;
+    $('#hint').innerHTML = nextHint();
+    $('#rank').innerHTML = `<h3>1픽 후보 근거</h3>` + b.map((x,i)=>`<div class="row">
+      <div class="rk">${i+1}</div><div class="mid">
+      <div class="nm">${x.c.name}<span class="tier">${x.c.tier}</span></div>
+      <div class="rs"><div>${x.why}</div></div></div></div>`).join('');
+    return;
+  }
+
+  const top=list[0], best=top.sc;
+  const ties=list.filter(r=>r.sc===best&&best>0);
+  let cls='hero', lbl='추천', sub='';
+  if(best<=-1){ cls='hero badbox'; lbl='이 상황에 좋은 픽이 없음';
+    sub='점수가 전부 마이너스다. 아래 1위가 그나마 덜 나쁜 선택이고, 밴이 가능하면 상대 픽을 자르는 게 낫다.'; }
+  else if(best===0){ cls='hero warnbox'; lbl='뚜렷한 답이 없음';
+    sub='유불리가 갈리지 않는 상황. 아래 순위대로 무난한 걸 고르면 된다.'; }
+  else {
+    const r=top.rs.filter(x=>x.v>0&&x.t.includes('—'));
+    sub = r.length ? r.map(x=>x.t.replace(/<\/?b>/g,'')).join(' · ') : top.c.strength;
+  }
+  $('#hero').innerHTML =
+    (warn?`<div class="hero warnbox"><div class="lbl">경고</div>
+       <div class="big" style="font-size:19px">상대 ${warn.k}</div>
+       <div class="sub">${warn.note}</div></div>`:'') +
+    `<div class="${cls}"><div class="lbl">${lbl}</div>
+      <div class="big">${top.c.name}<em>${top.c.tier}</em></div>
+      <div class="sub">${sub}</div>
+      ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${t.c.name}</span>`).join('')}</div>`:''}
+    </div>`;
+  $('#hint').innerHTML = nextHint();
+
+  $('#rank').innerHTML = `<h3>전체 순위</h3>` + list.map((r,i)=>`
+    <div class="row${r.sc<=-2?' no':''}">
+      <div class="rk">${i+1}</div>
+      <div class="mid"><div class="nm">${r.c.name}<span class="tier">${r.c.tier}</span></div>
+      ${r.rs.length?`<div class="rs">${r.rs.map(x=>
+        `<div class="${x.v>0?'p':x.v<0?'m':''}">${x.v>0?'＋':x.v<0?'－':'·'} ${x.t}</div>`).join('')}</div>`:''}
+      </div>
+      <div class="sc ${r.sc>0?'p':r.sc<0?'m':'z'}">${r.sc>0?'+':''}${r.sc}</div>
+    </div>`).join('');
+}
+
+/* 치트시트 */
+(function(){
+  const on={},off={}; CHAMPS.forEach(c=>{on[c.id]=[];off[c.id]=[];});
+  const push=(src,pre)=>src.forEach(x=>CHAMPS.forEach(c=>{
+    const v=x.s?.[c.id];
+    if(v>=2) on[c.id].push(pre+(x.k||x.label));
+    else if(v<=-2) off[c.id].push(pre+(x.k||x.label));
+  }));
+  push(SUPPORTS,'우리 '); push(E_ADC,'상대 '); push(E_SUP,'상대폿 '); push(TRAITS,''); push(OURS,'');
+  $('#sheet').innerHTML = CHAMPS.map(c=>`<tr>
+    <td class="c">${c.name}<br><span style="font-size:9px;color:var(--warn);font-weight:700">${c.tier}</span></td>
+    <td class="g">${on[c.id].join(' · ')||'—'}</td>
+    <td class="r">${off[c.id].join(' · ')||'—'}</td></tr>`).join('');
+})();
+
+/* 챔프 상세 */
+$('#champs').innerHTML = CHAMPS.map(c=>`<div class="cd">
+  <h4>${c.name}<span class="tier">${c.tier}</span></h4><div class="tag">${c.tag}</div>
+  <dl><dt>핵심</dt><dd>${c.core}</dd><dt>강점</dt><dd>${c.strength}</dd><dt>약점</dt><dd>${c.weak}</dd>
+  <dt>스펠</dt><dd>${c.spell}</dd><dt>빌드</dt><dd>${c.build}</dd><dt>룬</dt><dd>${c.runes}</dd>
+  <dt>콤보</dt><dd><ul>${c.combo.map(x=>`<li>${x}</li>`).join('')}</ul></dd>
+  ${c.tip?`<dt>팁</dt><dd>${c.tip}</dd>`:''}${c.warn?`<dt>주의</dt><dd class="wn">${c.warn}</dd>`:''}</dl>
+  <div class="stat">${c.wr!=='—'?`승률 ${c.wr} · 픽률 ${c.pick} · 밴률 ${c.ban} · `:''}근거: ${c.src}</div>
+</div>`).join('');
+
+render();
+</script>
+</body></html>
