@@ -1,5 +1,5 @@
-/* 조합 분석 모듈 — 완성된 팀 조합 입력 → 추천 원딜 / 유의사항 / 아이템
-   챔프 태그는 Data Dragon에서 실시간으로 받고, 실패하면 내장 표로 대체한다. */
+/* 조합 데이터 모듈 — 로스터 · 상대 위협 · 아이템 규칙.
+   UI는 index.html이 담당하고, 이 파일은 데이터와 판정 함수만 제공한다. */
 (()=>{
 const DDJSON='https://ddragon.leagueoflegends.com/cdn/16.18.1/data/ko_KR/champion.json';
 
@@ -59,6 +59,9 @@ Nasus:'후반 Q 스택. 길어지면 못 버티니 빨리 끝내라'};
 const HEAL=['Soraka','Yuumi','Nami','DrMundo','Senna','Seraphine','Milio','Taric','Aatrox','Swain','Warwick','Sylas','Vladimir','Zac','Volibear','Fiddlesticks'];
 const CC=['Leona','Nautilus','Alistar','Maokai','Galio','Thresh','Blitzcrank','Morgana','Lux','Zyra','Amumu','Malphite','Sejuani','Ornn','Rammus','Ahri','Pyke','Rakan','Janna','Seraphine','Orianna'];
 
+/* 이동기가 없어 잡히면 끝나는 챔프 */
+const IMMOBILE=['Garen','Nasus','Darius','Annie','Soraka','Veigar','DrMundo','Malphite','Ashe','Jinx','Zyra','Lux','Swain','Seraphine','Sion','Yuumi','Nami','Janna'];
+
 /* 폴백용 한글명 (ddragon 실패 시) */
 const KO={Malphite:'말파이트',Ornn:'오른',DrMundo:'문도 박사',Rammus:'람머스',Sejuani:'세주아니',Amumu:'아무무',
 Zac:'자크',Shen:'쉔',Poppy:'뽀삐',Sion:'사이온',Zed:'제드',Katarina:'카타리나',Fizz:'피즈',Rengar:'렝가',
@@ -67,153 +70,7 @@ Yasuo:'야스오',Irelia:'이렐리아',Darius:'다리우스',Garen:'가렌',Nas
 Orianna:'오리아나',Veigar:'베이가',Ziggs:'직스',Taric:'타릭',Aatrox:'아트록스',Swain:'스웨인',Warwick:'워윅',
 Sylas:'사일러스',Vladimir:'블라디미르',Volibear:'볼리베어',Fiddlesticks:'피들스틱',Annie:'애니',Yone:'요네'};
 
-let ROSTER=null, LOADING=false;
-const ES=new Array(5).fill(null), AS=new Array(5).fill(null);
-let target=null, MYC=null, ROLE='';
-
-const el=(h)=>{const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild;};
-const $$=s=>document.querySelector(s);
-
-/* 스타일 */
-document.head.appendChild(el(`<style>
-.cmp h3{font-size:11px;font-weight:800;color:var(--dim2);letter-spacing:.06em;margin:14px 0 7px}
-.slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.slot{aspect-ratio:1;border:1px dashed var(--line);border-radius:14px;background:var(--card);
- display:grid;place-items:center;font-size:19px;color:#4A4A4A;position:relative;overflow:hidden;padding:0}
-.slot.on{border-style:solid;border-color:var(--good)}
-.slot img{width:100%;height:100%;object-fit:cover}
-.slot b{position:absolute;bottom:0;left:0;right:0;background:rgba(15,15,15,.84);font-size:8.5px;
- font-weight:700;padding:2px 1px;color:var(--tx2);line-height:1.1}
-.slot.sel{border-color:var(--good2);border-style:solid}
-.pick{margin-top:9px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:10px}
-.pick input{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--line);
- background:#171717;color:var(--tx);font-size:13px;font-family:inherit;margin-bottom:8px}
-.roles{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
-.roles button{padding:7px 12px;border:1px solid var(--line);background:var(--card2);color:var(--dim);
- border-radius:16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
-.roles button.on{background:#2E2320;border-color:var(--good);color:#FFE3DA}
-.pick .empty{font-size:11.5px;color:var(--dim2);padding:14px 2px;text-align:center}
-.pick .cnt{font-size:10px;color:var(--dim2);font-weight:700;margin:0 0 6px}
-.pick .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:6px;max-height:210px;overflow:auto}
-.pick button{border:none;background:none;padding:0;cursor:pointer}
-.pick button img{width:100%;aspect-ratio:1;border-radius:9px;object-fit:cover;display:block}
-.pick button span{display:block;font-size:8.5px;color:var(--dim);margin-top:2px;line-height:1.1}
-.adv{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:12px 13px;margin-top:8px}
-.adv h4{font-size:12px;font-weight:800;margin-bottom:7px;color:#fff}
-.adv li{font-size:11.5px;line-height:1.55;color:var(--tx2);margin-bottom:5px;list-style:none;
- padding-left:11px;position:relative}
-.adv li:before{content:'';position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:#4A4A4A}
-.adv li b{color:var(--good2);font-weight:700}
-.adv li.w:before{background:var(--bad)}.adv li.g:before{background:var(--good)}
-.cmp .note{font-size:10.5px;color:var(--dim2);line-height:1.55;margin-top:9px}
-#mych{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
-#mych button{border:none;background:none;padding:0;cursor:pointer;font-family:inherit}
-#mych img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;display:block;
- border:2px solid #2A2A2A;filter:saturate(.45) brightness(.72)}
-#mych button.on img{border-color:var(--good2);filter:none}
-#mych span{display:block;font-size:9px;color:var(--dim);margin-top:3px;line-height:1.1;font-weight:600}
-#mych button.on span{color:var(--tx)}
-#mych button.dis{opacity:.28;pointer-events:none}
-#mych button.dis span{text-decoration:line-through}
-.adv .nm.top{font-size:16px;margin-bottom:2px}
-.slot.me{border-color:var(--good2);border-style:solid}
-.slot.me:after{content:'나';position:absolute;top:2px;left:3px;font-size:8px;font-weight:800;
- color:#fff;background:var(--good);border-radius:4px;padding:0 3px;line-height:1.4}
-.adv h4 .me{font-size:10px;font-weight:700;color:var(--dim2);margin-left:6px}
-.adv .sub{font-size:10.5px;color:var(--dim2);margin-top:7px;line-height:1.5}
-</style>`));
-
-/* 탭 + 패널 */
-const nav=document.querySelector('nav');
-const btn=el('<button data-p="cmp">조합 분석</button>'); nav.appendChild(btn);
-const panel=el('<section class="panel cmp" id="p-cmp"></section>');
-document.querySelector('#p-champ').after(panel);
-panel.innerHTML=`<h3>우리 팀 5명 (나 포함)</h3><div class="slots ally" id="as"></div>
-<h3>내 챔프 — 고르면 우리 팀 1번 칸에 들어간다</h3><div id="mych"></div>
-<h3>상대 팀 5명</h3><div class="slots" id="es"></div>
-<div id="picker"></div><div id="cout"></div>
-<div class="note">챔프 분류는 Riot Data Dragon에서 실시간으로 받아온다. 추천 원딜은 픽 찾기 탭과 같은 점수 엔진을 쓰되, 조합 특성을 자동으로 판정한다.</div>`;
-nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-  nav.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
-  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on'); $$('#p-'+b.dataset.p).classList.add('on'); scrollTo(0,0);
-  if(b.dataset.p==='cmp') load();
-});
-
-async function load(){
-  if(ROSTER||LOADING) return; LOADING=true;
-  try{
-    const j=await fetch(DDJSON).then(r=>r.json());
-    ROSTER=Object.values(j.data).map(c=>({id:c.id,name:c.name,tags:c.tags||[],info:c.info||{}}));
-  }catch(e){
-    const seen={}; Object.entries(ICON).forEach(([k,id])=>seen[id]=k);
-    Object.keys(KO).forEach(id=>{ if(!seen[id]) seen[id]=KO[id]; });
-    Object.keys(FB).forEach(id=>{ if(!seen[id]) seen[id]=KO[id]||id; });
-    ROSTER=Object.entries(seen).map(([id,nm])=>({id,name:nm,tags:[FB[id]||'Fighter'],info:{}}));
-  }
-  ROSTER.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
-  LOADING=false; draw();
-}
-
-/* 내 챔프 = 우리 팀 1번 칸 */
-function setMy(id){
-  const off = MYC===id;
-  MYC = off ? null : id;
-  if(AS[0] && !AS[0].me){ const free=AS.findIndex((x,i)=>i>0&&!x); if(free>0) AS[free]=AS[0]; AS[0]=null; }
-  if(MYC){
-    const c=CHAMPS.find(x=>x.id===MYC), dd=ICON[c.name]||c.id;
-    const r=(ROSTER&&ROSTER.find(x=>x.id===dd))||{id:dd,name:c.name,tags:['Marksman'],info:{}};
-    AS[0]={...r, me:true};
-  } else if(AS[0]&&AS[0].me) AS[0]=null;
-  target=null; draw(); analyze();
-  if(!off) setTimeout(()=>{const o=$$('#cout'); if(o&&o.firstChild) o.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
-}
-
-function draw(){
-  const mk=(arr,kind)=>arr.map((c,i)=>`<button class="slot${target&&target.kind===kind&&target.i===i?' sel':''}${c?' on':''}${c&&c.me?' me':''}" data-kind="${kind}" data-i="${i}">${c?`<img src="${DD}${c.id}.png" alt=""><b>${c.name}</b>`:'+'}</button>`).join('');
-  $$('#es').innerHTML=mk(ES,'e'); $$('#as').innerHTML=mk(AS,'a');
-  panel.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{
-    const kind=b.dataset.kind, i=+b.dataset.i, arr=kind==='e'?ES:AS;
-    if(kind==='a'&&i===0&&AS[0]&&AS[0].me){ setMy(MYC); return; }
-    if(arr[i]){arr[i]=null; target=null;} else target={kind,i};
-    draw(); analyze();
-    if(target) setTimeout(()=>{const pk=$$('#picker .pick'); if(pk) pk.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
-  });
-  const bn=n=>(typeof BANS!=='undefined')&&BANS.has(n);
-  $$('#mych').innerHTML=CHAMPS.map(c=>`<button data-c="${c.id}" class="${MYC===c.id?'on':''}${bn(c.name)?' dis':''}">${ico(c.name)}<span>${c.name}</span></button>`).join('');
-  $$('#mych').querySelectorAll('button').forEach(b=>{ if(b.classList.contains('dis')) return;
-    b.onclick=()=>setMy(b.dataset.c); });
-  drawPicker();
-}
-const ROLES=[['','전체'],['Tank','탱커'],['Fighter','전사'],['Assassin','암살자'],
-  ['Mage','메이지'],['Support','서폿'],['Marksman','원딜']];
-function drawPicker(q){
-  const box=$$('#picker');
-  if(!target||!ROSTER){box.innerHTML=''; return;}
-  const used=new Set([...ES,...AS].filter(Boolean).map(c=>c.id));
-  const banned=(typeof BANS!=='undefined')?BANS:new Set();
-  const qq=(q||'').trim();
-  const list=ROSTER.filter(c=>!used.has(c.id)&&!banned.has(c.name)
-    &&(!ROLE||c.tags.includes(ROLE))
-    &&(!qq||c.name.includes(qq)||c.id.toLowerCase().includes(qq.toLowerCase())));
-  const who=target.kind==='e'?'상대 팀':'우리 팀';
-  box.innerHTML=`<div class="pick">
-    <div class="roles">${ROLES.map(([k,lb])=>`<button data-r="${k}" class="${ROLE===k?'on':''}">${lb}</button>`).join('')}</div>
-    <input placeholder="${who} ${target.i+1}번 — 이름으로 찾기" value="${qq}">
-    <div class="cnt">${list.length}명</div>
-    ${list.length?`<div class="grid">${list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')}</div>`
-      :'<div class="empty">조건에 맞는 챔프가 없다. 역할을 바꾸거나 검색어를 지워라.</div>'}</div>`;
-  const inp=box.querySelector('input');
-  inp.oninput=()=>{const v=inp.value; drawPicker(v); const n=$$('#picker input'); if(n){n.focus(); n.setSelectionRange(v.length,v.length);} };
-  box.querySelectorAll('.roles button').forEach(b=>b.onclick=()=>{
-    ROLE=b.dataset.r; drawPicker(inp.value); });
-  box.querySelectorAll('.grid button').forEach(b=>b.onclick=()=>{
-    const c=ROSTER.find(x=>x.id===b.dataset.id);
-    (target.kind==='e'?ES:AS)[target.i]=c; target=null; draw(); analyze();
-  });
-}
-
-/* 챔프별 아이템·운영 보정 — 일반 규칙을 챔프 특성으로 덮어쓴다 */
+/* 챔프별 아이템 보정 — 일반 규칙을 챔프 특성으로 덮어쓴다 */
 const GEN={
  tank:'<b>도미닉의 인사</b> — 방어구 관통',
  heal:'<b>필멸자의 인사</b> — 치유 감소. 없으면 못 녹인다',
@@ -243,78 +100,81 @@ const OVR={
  jhin:{cc:'<b>유령무희·질풍검</b> — 진은 이속이 곧 공격력이다. 헤르메스보다 이속템',
        tank:'<b>도미닉의 인사</b> — 4번째 탄 확정 치명타에 방관을 얹는다'}};
 
-function analyze(){
-  const out=$$('#cout'); const en=ES.filter(Boolean), al=AS.filter(Boolean);
-  if(en.length<2){out.innerHTML=''; return;}
-  const has=t=>en.filter(c=>c.tags.includes(t)).length;
-  const tanks=has('Tank'), assassins=has('Assassin');
+/* 슬롯에 들어온 챔프로 조합 특성을 자동 판정한다 */
+function flags(en,al){
+  const has=(a,t)=>a.filter(c=>c.tags.includes(t)).length;
+  const tanks=has(en,'Tank'), ass=has(en,'Assassin');
   const ap=en.filter(c=>c.tags.includes('Mage')||(c.info.magic||0)>=7).length;
   const ad=en.filter(c=>(c.info.attack||0)>=7).length;
   const ccN=en.filter(c=>CC.includes(c.id)).length;
-  const heEn=en.filter(c=>HEAL.includes(c.id)).length;
-  const alTank=al.filter(c=>c.tags.includes('Tank')).length;
+  const heal=en.filter(c=>HEAL.includes(c.id)).length;
+  const immob=en.filter(c=>IMMOBILE.includes(c.id)).length;
+  const alTank=has(al,'Tank'), alAss=has(al,'Assassin');
   const alHeal=al.filter(c=>HEAL.includes(c.id)).length;
+  const alCC=al.filter(c=>CC.includes(c.id)).length;
   const alEng=al.filter(c=>CC.includes(c.id)&&c.tags.includes('Tank')).length;
+  return {
+    tr:{dive:ass>=2, tank:tanks>=2, cc:ccN>=3, immobile:immob>=2},
+    our:{'우리팀에 이니시·탱커 있음':alEng>=1||alTank>=2,
+         '우리팀에 CC가 거의 없음':al.length>=3&&alCC===0,
+         '우리팀에 암살자·다이브 있음':alAss>=1},
+    st:{tanks,ass,ap,ad,ccN,heal,alTank,alHeal,alEng,alCC}
+  };
+}
 
-  const flags={dive:assassins>=2, tank:tanks>=2, cc:ccN>=3, immobile:en.filter(c=>['Garen','Nasus','Darius','Annie','Soraka','Veigar','DrMundo','Malphite'].includes(c.id)).length>=2};
-  const scores=CHAMPS.map(c=>{
-    let sc=0, rs=[];
-    Object.keys(flags).forEach(f=>{ if(!flags[f]) return; const t=TRAITS.find(x=>x.k===f); if(!t) return;
-      const v=t.s?.[c.id]; if(v===undefined) return; sc+=v; if(v!==0) rs.push({v,t:t.label+(t.why?.[c.id]?' — '+t.why[c.id]:'')}); });
-    return {c,sc,rs};
-  }).sort((a,b)=>b.sc-a.sc||CHAMPS.indexOf(a.c)-CHAMPS.indexOf(b.c));
-
-  const top=scores[0];
-  const me=MYC?CHAMPS.find(c=>c.id===MYC):null;
-  const stat=`상대 탱커 ${tanks} · 암살자 ${assassins} · AP ${ap} · AD ${ad} · CC ${ccN}`;
-
-  /* ── 추천 카드 ── */
-  let html=`<div class="adv"><h4>이 조합에 추천</h4>
-    <div class="nm top">${ico(top.c.name)}${top.c.name}<span class="tier">${top.c.tier}</span></div>
-    ${top.rs.length?`<ul style="margin-top:7px">${top.rs.map(r=>`<li class="${r.v>0?'g':'w'}">${r.t}</li>`).join('')}</ul>`:''}
-    <ul style="margin-top:6px">${scores.slice(1,4).map(x=>`<li>${x.c.name} ${x.sc>0?'+':''}${x.sc}</li>`).join('')}</ul>
-    <div class="sub">${stat}</div>
-    ${me?'':'<div class="sub">위에서 <b>내 챔프</b>를 고르면 운영 방법과 아이템이 나온다.</div>'}</div>`;
-
-  /* ── 운영 방법 (내 챔프 기준) ── */
+/* 추천 원딜(me) 기준 운영 방법 · 유의사항 · 아이템 카드 HTML */
+function advice(en,al,me,f){
+  const s=f.st; let html='';
+  const stat=`상대 탱커 ${s.tanks} · 암살자 ${s.ass} · AP ${s.ap} · AD ${s.ad} · CC ${s.ccN}`;
   if(me){
-    const play=[];
-    play.push(`<li><b>핵심</b> ${me.core}</li>`);
-    play.push(`<li class="w"><b>약점</b> ${me.weak}</li>`);
-    if(flags.dive) play.push(`<li class="w">상대 암살자 ${assassins}명 — 한타 시작 전에 점멸·생존기가 살아 있어야 한다. 사이드 혼자 가지 마라</li>`);
-    if(flags.tank) play.push(`<li>상대 탱커 ${tanks}명 — 앞라인을 억지로 녹이려 하지 말고 뒤로 넘어오는 딜러부터 잘라라</li>`);
-    if(ccN>=3) play.push(`<li class="w">CC ${ccN}개 — 한 번 걸리면 연계로 끝난다. 아군보다 반 발 뒤에서 딜하라</li>`);
-    if(heEn>=1) play.push(`<li class="w">상대에 회복 챔프 — 치유 감소 없이는 장기전에서 못 이긴다</li>`);
+    const p=[];
+    p.push(`<li><b>핵심</b> ${me.core}</li>`);
+    p.push(`<li class="w"><b>약점</b> ${me.weak}</li>`);
+    if(f.tr.dive) p.push(`<li class="w">상대 암살자 ${s.ass}명 — 한타 전에 점멸·생존기가 살아 있어야 한다. 사이드 혼자 가지 마라</li>`);
+    if(f.tr.tank) p.push(`<li>상대 탱커 ${s.tanks}명 — 앞라인을 억지로 녹이지 말고 넘어오는 딜러부터 잘라라</li>`);
+    if(s.ccN>=3) p.push(`<li class="w">CC ${s.ccN}개 — 한 번 걸리면 연계로 끝난다. 아군보다 반 발 뒤에서 딜하라</li>`);
+    if(s.heal>=1) p.push(`<li class="w">상대에 회복 챔프 — 치유 감소 없이는 장기전에서 못 이긴다</li>`);
     if(al.length){
-      if(alTank===0) play.push(`<li class="w">우리 팀에 앞라인이 없다 — 라인전부터 안전 우선. 먼저 싸움을 열지 마라</li>`);
-      if(alHeal>=1) play.push(`<li class="g">아군에 보호·회복 챔프가 있다 — 평소보다 한 발 앞에서 딜해도 된다</li>`);
-      if(alEng>=1) play.push(`<li class="g">아군 이니시가 있다 — 진입 타이밍을 미리 읽고 딜 각을 잡아둬라</li>`);
+      if(!s.alTank) p.push(`<li class="w">우리 팀에 앞라인이 없다 — 라인전부터 안전 우선. 먼저 싸움을 열지 마라</li>`);
+      if(s.alHeal>=1) p.push(`<li class="g">아군에 보호·회복 챔프가 있다 — 평소보다 한 발 앞에서 딜해도 된다</li>`);
+      if(s.alEng>=1) p.push(`<li class="g">아군 이니시가 있다 — 진입 타이밍을 미리 읽고 딜 각을 잡아둬라</li>`);
     }
-    if(me.tip) play.push(`<li><b>팁</b> ${me.tip}</li>`);
-    html+=`<div class="adv"><h4>${me.name} 운영 방법<span class="me">내 챔프</span></h4><ul>${play.join('')}</ul></div>`;
+    if(me.tip) p.push(`<li><b>팁</b> ${me.tip}</li>`);
+    html+=`<div class="adv"><h4>${me.name} 운영 방법</h4><ul>${p.join('')}</ul><div class="sub">${stat}</div></div>`;
   }
-
-  /* ── 상대 위협 ── */
   const warn=en.filter(c=>THREAT[c.id]).map(c=>`<li class="w"><b>${c.name}</b> ${THREAT[c.id]}</li>`).join('');
   if(warn) html+=`<div class="adv"><h4>플레이 유의사항</h4><ul>${warn}</ul></div>`;
-
-  /* ── 아이템 ── */
-  const sit=[];
-  const pick=k=>(me&&OVR[me.id]&&OVR[me.id][k])||GEN[k];
-  if(tanks>=2) sit.push(pick('tank'));
-  if(heEn>=1) sit.push(pick('heal'));
-  if(ap>=3) sit.push(pick('ap'));
-  if(ad>=3) sit.push(pick('ad'));
-  if(assassins>=1) sit.push(pick('dive'));
-  if(ccN>=3) sit.push(pick('cc'));
-  if(tanks>=2||ccN>=3) sit.push(pick('group'));
-  const uniq=[...new Set(sit)];
+  const sit=[], pick=k=>(me&&OVR[me.id]&&OVR[me.id][k])||GEN[k];
+  if(s.tanks>=2) sit.push(pick('tank'));
+  if(s.heal>=1) sit.push(pick('heal'));
+  if(s.ap>=3) sit.push(pick('ap'));
+  if(s.ad>=3) sit.push(pick('ad'));
+  if(s.ass>=1) sit.push(pick('dive'));
+  if(s.ccN>=3) sit.push(pick('cc'));
+  if(s.tanks>=2||s.ccN>=3) sit.push(pick('group'));
+  const u=[...new Set(sit)];
   html+=`<div class="adv"><h4>아이템${me?` — ${me.name}`:''}</h4>
     ${me?`<ul><li class="g"><b>코어</b> ${me.build}</li><li><b>룬</b> ${me.runes}</li></ul>
       <div class="sub">상대 조합에 맞춘 추가·교체</div>`:''}
-    <ul${me?' style="margin-top:5px"':''}>${uniq.length?uniq.map(x=>`<li class="g">${x}</li>`).join(''):'<li><b>이오니아 장화</b> — 뚜렷한 카운터 요소가 없다. 공격적으로 가도 된다</li>'}</ul>
-    ${me?'':'<div class="sub">내 챔프를 고르면 그 챔프 기준으로 다시 계산한다.</div>'}</div>`;
-
-  out.innerHTML=html;
+    <ul${me?' style="margin-top:5px"':''}>${u.length?u.map(x=>`<li class="g">${x}</li>`).join(''):'<li><b>이오니아 장화</b> — 뚜렷한 카운터 요소가 없다. 공격적으로 가도 된다</li>'}</ul></div>`;
+  return html;
 }
+
+window.WRC={THREAT,HEAL,CC,IMMOBILE,flags,advice};
+
+/* 전 챔피언 로스터 — 밴 목록과 팀 슬롯이 이걸 쓴다 */
+(async()=>{
+  let R;
+  try{
+    const j=await fetch(DDJSON).then(r=>r.json());
+    R=Object.values(j.data).map(c=>({id:c.id,name:c.name,tags:c.tags||[],info:c.info||{}}));
+  }catch(e){
+    const seen={}; Object.entries(ICON).forEach(([k,id])=>seen[id]=k);
+    Object.keys(KO).forEach(id=>{ if(!seen[id]) seen[id]=KO[id]; });
+    Object.keys(FB).forEach(id=>{ if(!seen[id]) seen[id]=KO[id]||id; });
+    R=Object.entries(seen).map(([id,nm])=>({id,name:nm,tags:[FB[id]||'Fighter'],info:{}}));
+  }
+  R.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  if(window.onRoster) window.onRoster(R);
+})();
 })();
