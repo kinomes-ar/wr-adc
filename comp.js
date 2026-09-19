@@ -107,6 +107,8 @@ document.head.appendChild(el(`<style>
 #mych button.on img{border-color:var(--good2);filter:none}
 #mych span{display:block;font-size:9px;color:var(--dim);margin-top:3px;line-height:1.1;font-weight:600}
 #mych button.on span{color:var(--tx)}
+#mych button.dis{opacity:.28;pointer-events:none}
+#mych button.dis span{text-decoration:line-through}
 .adv .nm.top{font-size:16px;margin-bottom:2px}
 .slot.me{border-color:var(--good2);border-style:solid}
 .slot.me:after{content:'나';position:absolute;top:2px;left:3px;font-size:8px;font-weight:800;
@@ -170,15 +172,18 @@ function draw(){
     if(arr[i]){arr[i]=null; target=null;} else target={kind,i};
     draw(); analyze();
   });
-  $$('#mych').innerHTML=CHAMPS.map(c=>`<button data-c="${c.id}" class="${MYC===c.id?'on':''}">${ico(c.name)}<span>${c.name}</span></button>`).join('');
-  $$('#mych').querySelectorAll('button').forEach(b=>b.onclick=()=>setMy(b.dataset.c));
+  const bn=n=>(typeof BANS!=='undefined')&&BANS.has(n);
+  $$('#mych').innerHTML=CHAMPS.map(c=>`<button data-c="${c.id}" class="${MYC===c.id?'on':''}${bn(c.name)?' dis':''}">${ico(c.name)}<span>${c.name}</span></button>`).join('');
+  $$('#mych').querySelectorAll('button').forEach(b=>{ if(b.classList.contains('dis')) return;
+    b.onclick=()=>setMy(b.dataset.c); });
   drawPicker();
 }
 function drawPicker(q){
   const box=$$('#picker');
   if(!target||!ROSTER){box.innerHTML=''; return;}
   const used=new Set([...ES,...AS].filter(Boolean).map(c=>c.id));
-  const list=ROSTER.filter(c=>!used.has(c.id)&&(!q||c.name.includes(q)||c.id.toLowerCase().includes(q.toLowerCase()))).slice(0,300);
+  const banned=(typeof BANS!=='undefined')?BANS:new Set();
+  const list=ROSTER.filter(c=>!used.has(c.id)&&!banned.has(c.name)&&(!q||c.name.includes(q)||c.id.toLowerCase().includes(q.toLowerCase()))).slice(0,300);
   box.innerHTML=`<div class="pick"><input placeholder="챔프 이름 검색" value="${q||''}">
     <div class="grid">${list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')}</div></div>`;
   const inp=box.querySelector('input');
