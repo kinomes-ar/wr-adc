@@ -64,6 +64,14 @@
   #p-pick.on.blind .hero .sub{font-size:11.5px}
   #p-pick.on.blind #reset{padding:15px;font-size:13px}
 
+  /* 단계를 펼치는 동안에는 순위를 숨기고 그 단만 넓게 —
+     좁은 칸에 칩을 우겨넣어 사진이 찌그러지는 걸 막는다 (선택 전후 크기 동일) */
+  #p-pick.on:has(#steps .step[open]) #rank{display:none}
+  #p-pick.on:has(#steps .step[open]) #steps{grid-column:2/-1;grid-template-columns:1fr;
+    grid-auto-rows:auto;align-items:start;align-content:start;overflow-y:auto}
+  #p-pick.on:has(#steps .step[open]) #steps>.step:not([open]){display:none}
+  #p-pick.on:has(#steps .step[open]) #steps>.step[open]>summary{flex:0 0 auto;padding:9px 12px;font-size:12.5px}
+
   /* 단계 — 좁아진 폭에 맞춰 촘촘하게 */
   #steps{grid-template-columns:1fr;gap:6px}
   #hint.off ~ #reset{padding:13px;font-size:12.5px;margin-top:0}
