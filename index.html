@@ -157,8 +157,9 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
 .chip.banned{opacity:.3;pointer-events:none}
 .chip.banned span{text-decoration:line-through}
 #s-ban>summary .n{background:#2A2A2A;color:var(--dim)}
-#s-ban>summary .pick img{width:21px;height:21px;border-color:var(--bad)}
-#s-ban>summary .pick i{background:#1B2830;border-color:var(--bad);color:#9CC9DC}
+#s-ban>summary .pick{flex-wrap:nowrap;white-space:nowrap}
+#s-ban>summary .pick .cnt{font-weight:800;color:#9CC9DC;letter-spacing:.01em}
+#s-ban>summary .pick .cnt.ok{color:var(--good2)}
 #s-ban.done>summary .n{background:#22343D;color:var(--bad2)}
 #s-ban.fin>summary .n{background:#3B2A25;color:var(--good2)}
 .chips.tier{display:flex;gap:6px}
@@ -621,7 +622,7 @@ function drawBans(){
   const el=$('#s-ban'), p=el.querySelector('.pick'), a=[...BANS];
   el.classList.toggle('done',a.length>0);
   el.classList.toggle('fin',BANDONE);
-  p.innerHTML = a.length ? a.slice(0,3).map(n=>ico(n)||`<i>${n}</i>`).join('')+(a.length>3?`<i>+${a.length-3}</i>`:'')+(BANDONE?'<i>완료</i>':'') : '없음';
+  p.innerHTML = a.length ? `<span class="cnt${BANDONE?' ok':''}">${a.length}/${BANMAX}${BANDONE?' 완료':''}</span>` : '없음';
   p.classList.toggle('none',!a.length);
 }
 document.addEventListener('click',e=>{
