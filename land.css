@@ -53,24 +53,19 @@
   #p-pick.on.blind #steps>.step>summary .n{width:21px;height:21px;font-size:11px}
   #p-pick.on.blind #steps>.step>summary .pick{font-size:13px}
   #p-pick.on.blind #steps>.step>summary .pick img{width:28px;height:28px}
-  /* 하나를 펼치면 그 단계만 전체 폭으로 — 좁은 칸에 칩을 우겨넣지 않는다 */
-  #p-pick.on.blind #steps:has(.step[open]){grid-template-columns:1fr;grid-auto-rows:auto;
-    align-items:start;align-content:start;overflow-y:auto}
-  #p-pick.on.blind #steps:has(.step[open])>.step:not([open]){display:none}
-  #p-pick.on.blind #steps:has(.step[open])>.step[open]>summary{flex:0 0 auto;padding:9px 12px;font-size:12.5px}
   /* 왼쪽 단(추천/힌트/초기화)도 같이 커진다 */
   #p-pick.on.blind .hero .big{font-size:20px}
   #p-pick.on.blind .hero .big img{width:42px;height:42px}
   #p-pick.on.blind .hero .sub{font-size:11.5px}
   #p-pick.on.blind #reset{padding:15px;font-size:13px}
 
-  /* 단계를 펼치는 동안에는 순위를 숨기고 그 단만 넓게 —
-     좁은 칸에 칩을 우겨넣어 사진이 찌그러지는 걸 막는다 (선택 전후 크기 동일) */
+  /* 단계를 펼치는 동안에는 순위를 숨기고 그 단만 넓게 쓴다 —
+     좁은 칸에 칩·초상화를 우겨넣지 않도록 (펼치기 전후 사진 크기 동일) */
   #p-pick.on:has(#steps .step[open]) #rank{display:none}
   #p-pick.on:has(#steps .step[open]) #steps{grid-column:2/-1;grid-template-columns:1fr;
-    grid-auto-rows:auto;align-items:start;align-content:start;overflow-y:auto}
-  #p-pick.on:has(#steps .step[open]) #steps>.step:not([open]){display:none}
-  #p-pick.on:has(#steps .step[open]) #steps>.step[open]>summary{flex:0 0 auto;padding:9px 12px;font-size:12.5px}
+    grid-auto-rows:max-content;align-items:start;align-content:start;overflow-y:auto}
+  #p-pick.on:has(#steps .step[open]) #steps>.step{display:block;min-height:0}
+  #p-pick.on:has(#steps .step[open]) #steps>.step>summary{flex:none;padding:9px 12px;font-size:12.5px}
 
   /* 단계 — 좁아진 폭에 맞춰 촘촘하게 */
   #steps{grid-template-columns:1fr;gap:6px}
