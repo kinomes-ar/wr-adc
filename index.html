@@ -255,7 +255,7 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
         <button class="chip tg" data-max="10">마스터 이상<small>1인 1밴 · 총 10밴</small></button>
       </div>
       <div class="bl">전 챔피언 — 양 팀 밴 전부<span id="bancnt"></span></div>
-      <input class="srch" id="bansrch" placeholder="챔프 이름 검색">
+      <input class="srch" id="bansrch" placeholder="챔프 이름 · 초성 검색 (예: ㄱㄹ)">
       <div class="chips grid ban" id="c-ban"></div>
       <button class="done" id="bandone">밴 완료 — 남은 풀에서 추천 받기</button>
       <button class="reset" id="banclr">밴 전부 해제</button>
@@ -659,6 +659,12 @@ const $=s=>document.querySelector(s);
 const byId=id=>CHAMPS.find(c=>c.id===id);
 const MYPOOL=new Set(CHAMPS.map(c=>c.name));
 const ddId=n=>ICON[n]||n;
+/* 초성 검색 — 'ㄱㄹ' 로 '가렌' 이 잡힌다 */
+const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const chos=s=>[...s].map(ch=>{const c=ch.charCodeAt(0);
+  return (c>=0xAC00&&c<=0xD7A3)?CHO[Math.floor((c-0xAC00)/588)]:ch;}).join('');
+const hit=(c,q)=>!q||c.name.includes(q)||chos(c.name).includes(q)
+  ||c.id.toLowerCase().includes(q.toLowerCase());
 
 /* ── 조합 특성 칩 (자동 판정 + 수동 수정) ── */
 const TRSRC={tr:TRAITS,our:OURS};
@@ -672,7 +678,7 @@ function drawBans(){
   const el=$('#c-ban'), full=BANS.size>=BANMAX, q=BANQ.trim();
   if(!ROSTER){ el.innerHTML='<div class="bl">챔프 목록 불러오는 중…</div>'; }
   else{
-    const list=ROSTER.filter(c=>!q||c.name.includes(q)||c.id.toLowerCase().includes(q.toLowerCase()));
+    const list=ROSTER.filter(c=>hit(c,q));
     el.innerHTML=list.map(c=>{
       const on=BANS.has(c.name);
       return `<button class="chip bn${on?' on':''}${MYPOOL.has(c.name)?' mine':''}${!on&&full?' lock':''}" data-ban="${c.name}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`;
@@ -706,8 +712,7 @@ function fillPicker(box,q){
   const used=new Set([...ALLY,...ENEMY].filter(Boolean).map(c=>c.id));
   const qq=(q||'').trim();
   const list=ROSTER.filter(c=>!used.has(c.id)&&!BANS.has(c.name)
-    &&(!ROLE||c.tags.includes(ROLE))
-    &&(!qq||c.name.includes(qq)||c.id.toLowerCase().includes(qq.toLowerCase())));
+    &&(!ROLE||c.tags.includes(ROLE))&&hit(c,qq));
   box.querySelector('.cnt').textContent=`${list.length}명`;
   const g=box.querySelector('.lst');
   g.className=list.length?'lst grid':'lst empty';
@@ -725,7 +730,7 @@ function drawPicker(q){
   const box=$(target.kind==='a'?'#pk-a':'#pk-e');
   box.innerHTML=`<div class="pick">
     <div class="roles">${ROLES.map(([k,lb])=>`<button data-r="${k}" class="${ROLE===k?'on':''}">${lb}</button>`).join('')}</div>
-    <input placeholder="${target.kind==='a'?'우리 팀':'상대 팀'} ${target.i+1}번 — 이름으로 찾기">
+    <input placeholder="${target.kind==='a'?'우리 팀':'상대 팀'} ${target.i+1}번 — 이름 · 초성 검색">
     <div class="cnt"></div>
     <div class="lst grid"></div></div>`;
   const inp=box.querySelector('input');
