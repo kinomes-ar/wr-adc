@@ -131,6 +131,13 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
  border:1.5px solid #4276AB;display:block;flex:0 0 auto}
 .step>summary .pick i{font-style:normal;font-size:10.5px;font-weight:700;background:#23405E;
  border:1px solid #4276AB;color:#EAF2FB;border-radius:6px;padding:2px 6px;line-height:1.3}
+/* ── 단계 2열 · 좁은 칩 ── */
+#steps{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-items:start}
+#steps>.step{margin-bottom:0}
+#steps>.step[open]{grid-column:1/-1}
+.chips.grid{grid-template-columns:repeat(auto-fill,minmax(54px,1fr))}
+.chips.grid .chip img{width:38px;height:38px}
+#hint.off ~ #reset{padding:17px;font-size:13.5px;margin-top:14px}
 /* ── 힌트 닫기 ── */
 .hint{position:relative;padding-right:32px}
 .hint.off{display:none}
@@ -559,7 +566,6 @@ $('#reset').onclick=()=>{
   SEL.sup=SEL.eadc=SEL.esup=null; SEL.tr.clear(); SEL.our.clear();
   document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('.step').forEach(x=>x.open=false);
-  HINTOFF=false; try{localStorage.removeItem('wrhint')}catch(_){}
   render();
 };
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
@@ -622,6 +628,7 @@ function render(){
   const warn = SEL.eadc!=null && E_ADC[SEL.eadc].ban ? E_ADC[SEL.eadc] : null;
 
   /* 1픽 / 정보 없음 */
+  $('#p-pick').classList.toggle('blind',!A.length);
   if(!A.length){
     const b=BLIND.map(x=>({c:byId(x.id),why:x.why}));
     $('#hero').innerHTML = `<div class="hero"><div class="lbl">1픽 · 정보 없을 때</div>
