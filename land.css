@@ -1,0 +1,70 @@
+/* 가로 모드 최적화 — 폰을 눕힌 상태(높이 540px 이하)에서만 적용 */
+@media (orientation:landscape) and (max-height:540px){
+
+  body{font-size:14px;
+    padding:0 max(10px,env(safe-area-inset-left)) 14px max(10px,env(safe-area-inset-right))}
+  .wrap{max-width:none}
+
+  /* 헤더·탭 압축 — 세로 공간이 곧 전부 */
+  header{padding:7px 0 3px}
+  h1{font-size:13.5px}
+  header span{font-size:9.5px}
+  nav{padding:3px 0 6px;gap:4px}
+  nav button{padding:6px 4px;font-size:11.5px;border-radius:8px}
+
+  /* ── 픽 찾기: 2단 ── */
+  #p-pick.on{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+  #hero,#hint,#reset,#rank{grid-column:1/-1}
+
+  .hero{padding:10px 12px;margin-bottom:0;border-radius:12px}
+  .hero .lbl{font-size:9px;margin-bottom:3px}
+  .hero .big{font-size:20px;gap:9px}
+  .hero .big img{width:38px;height:38px}
+  .hero .sub{font-size:11px;margin-top:4px}
+  .alts{margin-top:7px;gap:5px}
+  .hint{margin-bottom:0;padding:7px 10px;font-size:11px}
+
+  .step{margin-bottom:0}
+  .step>summary{padding:9px 11px;font-size:12px}
+  .body{padding:0 9px 9px}
+  .chips.grid{grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:5px}
+  .chips.grid .chip{padding:5px 1px 4px;font-size:9px;gap:3px}
+  .chips.grid .chip img{width:36px;height:36px}
+  .reset{margin-top:2px;padding:8px;font-size:11.5px}
+
+  /* 순위는 2열로 — 세로 스크롤 반으로 */
+  .rank{margin-top:6px}
+  .rank>h3{margin-bottom:5px}
+  #rank{display:block}
+  #rank>h3{grid-column:1/-1}
+  .rank .row{display:flex}
+  .row{padding:8px 10px;margin-bottom:5px;gap:7px}
+  .nm{font-size:13px}
+  .nm img{width:24px;height:24px}
+  .rs div{font-size:10.5px}
+
+  /* ── 챔프 상세: 2열 ── */
+  #champs{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+  .cd{margin-bottom:0;padding:11px 12px}
+
+  /* ── 조합 분석: 입력 왼쪽 / 결과 오른쪽 ── */
+  #p-cmp.on{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+  .cmp h3,.cmp .note{grid-column:1/-1;margin:6px 0 5px}
+  #es,#as{grid-column:1/-1}
+  #picker{grid-column:1}
+  #cout{grid-column:2}
+  .slots{gap:5px}
+  .slot b{font-size:8px}
+  .pick{margin-top:0;padding:8px}
+  .pick .grid{grid-template-columns:repeat(auto-fill,minmax(48px,1fr));max-height:190px;gap:5px}
+  .adv{margin-top:0;margin-bottom:7px;padding:10px 11px}
+  .adv h4{font-size:11.5px;margin-bottom:5px}
+  .adv li{font-size:11px;margin-bottom:4px}
+
+  .ftr{margin-top:12px;padding-top:9px;font-size:9.5px}
+}
+
+/* 가로인데 화면이 넓은 태블릿·데스크톱: 폭만 넓히고 2단까지는 안 감 */
+@media (orientation:landscape) and (min-height:541px){
+  .wrap{max-width:720px}
+}
