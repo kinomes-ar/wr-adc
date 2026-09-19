@@ -15,7 +15,7 @@
   nav button{padding:5px 4px;font-size:11px;border-radius:8px}
 
   /* ── 픽 찾기: 3단 ── */
-  #p-pick.on{display:grid;gap:7px;align-items:start;
+  #p-pick.on{display:grid;gap:7px;align-items:stretch;
     grid-template-columns:minmax(0,.92fr) minmax(0,1fr) minmax(0,1.3fr);
     grid-template-rows:minmax(0,1fr) auto auto}
   #hero{grid-column:1;grid-row:1}
@@ -23,8 +23,8 @@
   #reset{grid-column:1;grid-row:3}
   #steps{grid-column:2;grid-row:1/-1}
   #rank{grid-column:3;grid-row:1/-1}
-  #p-pick.on{max-height:calc(100dvh - 62px);overflow:hidden}
-  #steps,#rank{max-height:calc(100dvh - 62px);overflow-y:auto;overscroll-behavior:contain}
+  #p-pick.on{height:calc(100dvh - 62px - var(--st));overflow:hidden}
+  #steps,#rank{height:100%;overflow-y:auto;overscroll-behavior:contain}
   #hero{height:100%;overflow-y:auto;overscroll-behavior:contain}
   #steps::-webkit-scrollbar,#rank::-webkit-scrollbar,#hero::-webkit-scrollbar{width:0}
 
@@ -44,7 +44,25 @@
   /* 1픽(선택 없음) — 순위 숨기고 단계에 공간을 준다 */
   #p-pick.on.blind{grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1fr)}
   #p-pick.on.blind #rank{display:none}
-  #p-pick.on.blind #steps{grid-column:2/-1;grid-template-columns:1fr 1fr;gap:6px}
+  #p-pick.on.blind #steps{grid-column:2/-1;grid-template-columns:1fr 1fr;
+    grid-auto-rows:minmax(0,1fr);gap:7px;align-content:stretch;align-items:stretch;overflow:hidden}
+  #p-pick.on.blind #steps>.step{display:flex;flex-direction:column;min-height:0}
+  #p-pick.on.blind #steps>.step>summary{flex:1;font-size:14px;padding:0 13px;gap:9px}
+  #p-pick.on.blind #steps>.step>summary .n{width:21px;height:21px;font-size:11px}
+  #p-pick.on.blind #steps>.step>summary .pick{font-size:13px}
+  #p-pick.on.blind #steps>.step>summary .pick img{width:28px;height:28px}
+  /* 하나를 펼치면 그 단계만 전체 폭으로 — 좁은 칸에 칩을 우겨넣지 않는다 */
+  #p-pick.on.blind #steps:has(.step[open]){grid-template-columns:1fr;grid-auto-rows:auto;
+    align-items:start;align-content:start;overflow-y:auto}
+  #p-pick.on.blind #steps:has(.step[open])>.step:not([open]){display:none}
+  #p-pick.on.blind #steps:has(.step[open])>.step[open]>summary{flex:0 0 auto;padding:9px 12px;font-size:12.5px}
+  /* 왼쪽 단(추천/힌트/초기화)도 같이 커진다 */
+  #p-pick.on.blind #hero{display:flex;flex-direction:column;justify-content:center}
+  #p-pick.on.blind #hero>.hero{width:100%}
+  #p-pick.on.blind .hero .big{font-size:20px}
+  #p-pick.on.blind .hero .big img{width:42px;height:42px}
+  #p-pick.on.blind .hero .sub{font-size:11.5px}
+  #p-pick.on.blind #reset{padding:15px;font-size:13px}
 
   /* 단계 — 좁아진 폭에 맞춰 촘촘하게 */
   #steps{grid-template-columns:1fr;gap:6px}
@@ -74,11 +92,14 @@
 
   /* ── 챔프 상세: 3열 ── */
   #p-champ.on{max-height:calc(100dvh - 62px);overflow-y:auto}
-  #champs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;align-items:start}
-  .cd{margin-bottom:0;padding:9px 10px}
-  .cd h4{font-size:12.5px}.cd h4 img{width:28px;height:28px}
-  .cd .tag{font-size:10px;margin:2px 0 7px}
-  .cd dl{grid-template-columns:38px 1fr;gap:4px 7px;font-size:10px}
+  #champs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
+  .cd{margin-bottom:0;padding:11px 13px}
+  .cd h4{font-size:14px}.cd h4 img{width:30px;height:30px}
+  .cd .tag{font-size:10.5px;margin:3px 0 6px}
+  .cd dl{grid-template-columns:42px 1fr;gap:0 9px;font-size:11.5px}
+  .cd dt{font-size:10px;padding:6px 0}
+  .cd dd{padding:6px 0;line-height:1.6}
+  .cd .stat{font-size:9.5px;margin-top:7px;padding-top:6px}
 
   /* ── 조합 분석: 좌 우리 팀 · 우 상대 팀 → 아래 결과 (패널 전체 스크롤) ── */
   #p-cmp.on{display:grid;gap:7px 10px;align-items:start;
@@ -90,9 +111,10 @@
   #p-cmp>h3:nth-of-type(1){grid-column:1;grid-row:1}
   #as{grid-column:1;grid-row:2}
   #p-cmp>h3:nth-of-type(2){grid-column:1/-1;grid-row:3;margin-top:3px}
-  #p-cmp #mych{grid-column:1/-1;grid-row:4;grid-template-columns:repeat(9,52px);
-    justify-content:start;gap:5px}
-  #p-cmp #mych span{font-size:8.5px;margin-top:3px}
+  #p-cmp #mych{grid-column:1/-1;grid-row:4;grid-template-columns:repeat(9,40px);
+    justify-content:start;gap:6px}
+  #p-cmp #mych span{font-size:8px;margin-top:2px}
+  #p-cmp #mych img{border-width:1.5px}
   #p-cmp>h3:nth-of-type(3){grid-column:2;grid-row:1}
   #es{grid-column:2;grid-row:2}
   #p-cmp .slots{grid-template-columns:repeat(5,58px);justify-content:start;gap:5px}
@@ -102,9 +124,11 @@
   #picker{grid-column:1/-1;grid-row:5}
   #picker:empty{display:none}
   #p-cmp .pick{margin-top:0;padding:8px;border-radius:12px}
-  #p-cmp .pick input{padding:7px 10px;font-size:12px;margin-bottom:7px}
-  #p-cmp .pick .grid{grid-template-columns:repeat(auto-fill,minmax(52px,1fr));
-    max-height:168px;gap:5px}
+  #p-cmp .pick input{padding:6px 10px;font-size:12px;margin-bottom:6px}
+  #p-cmp .roles{gap:4px;margin-bottom:6px}
+  #p-cmp .roles button{padding:5px 9px;font-size:10.5px}
+  #p-cmp .pick .grid{grid-template-columns:repeat(auto-fill,minmax(50px,1fr));
+    max-height:150px;gap:5px}
   #p-cmp .pick button span{font-size:8px}
 
   #cout{grid-column:1/-1;grid-row:6;
@@ -122,10 +146,13 @@
   /* 패널 자체가 스크롤 컨테이너라 헤더는 top:0 기준 (세로모드는 nav 높이만큼 내림) */
   #p-sheet th{top:0}
   #p-sheet .ftr{display:block;margin-top:10px;padding-top:8px;font-size:9px}
-  table{font-size:10px}
-  td{padding:6px 4px}
-  td.c{width:46px;font-size:11.5px}
-  td.c img{width:26px;height:26px}
+  table{font-size:11px}
+  td{padding:8px 6px}
+  td em{font-size:10.5px;padding:2px 7px;margin:0 3px 3px 0}
+  td i{font-size:8.5px;padding:1px 4px;margin:0 4px 3px 0}
+  .cg{margin-bottom:4px}
+  td.c{width:52px;font-size:12px}
+  td.c img{width:28px;height:28px}
 }
 
 /* 가로인데 화면이 넓은 태블릿·데스크톱: 폭만 넓히고 3단까지는 안 감 */
