@@ -701,28 +701,45 @@ function setMy(id){
 
 const ROLES=[['','전체'],['Tank','탱커'],['Fighter','전사'],['Assassin','암살자'],
   ['Mage','메이지'],['Support','서폿'],['Marksman','원딜']];
-function drawPicker(q){
-  document.querySelectorAll('.pkbox').forEach(b=>b.innerHTML='');
-  if(!target||!ROSTER) return;
-  const box=$(target.kind==='a'?'#pk-a':'#pk-e');
+/* 검색창은 다시 그리지 않는다 — 다시 그리면 한글 IME 조합이 끊겨 자모가 분리된다 */
+function fillPicker(box,q){
   const used=new Set([...ALLY,...ENEMY].filter(Boolean).map(c=>c.id));
   const qq=(q||'').trim();
   const list=ROSTER.filter(c=>!used.has(c.id)&&!BANS.has(c.name)
     &&(!ROLE||c.tags.includes(ROLE))
     &&(!qq||c.name.includes(qq)||c.id.toLowerCase().includes(qq.toLowerCase())));
-  box.innerHTML=`<div class="pick">
-    <div class="roles">${ROLES.map(([k,lb])=>`<button data-r="${k}" class="${ROLE===k?'on':''}">${lb}</button>`).join('')}</div>
-    <input placeholder="${target.kind==='a'?'우리 팀':'상대 팀'} ${target.i+1}번 — 이름으로 찾기" value="${qq}">
-    <div class="cnt">${list.length}명</div>
-    ${list.length?`<div class="grid">${list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')}</div>`
-      :'<div class="empty">조건에 맞는 챔프가 없다. 역할을 바꾸거나 검색어를 지워라.</div>'}</div>`;
-  const inp=box.querySelector('input');
-  inp.oninput=()=>{const v=inp.value; drawPicker(v); const n=box.querySelector('input'); if(n){n.focus(); n.setSelectionRange(v.length,v.length);} };
-  box.querySelectorAll('.roles button').forEach(b=>b.onclick=()=>{ROLE=b.dataset.r; drawPicker(inp.value);});
-  box.querySelectorAll('.grid button').forEach(b=>b.onclick=()=>{
+  box.querySelector('.cnt').textContent=`${list.length}명`;
+  const g=box.querySelector('.lst');
+  g.className=list.length?'lst grid':'lst empty';
+  g.innerHTML=list.length
+    ? list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')
+    : '조건에 맞는 챔프가 없다. 역할을 바꾸거나 검색어를 지워라.';
+  g.querySelectorAll('button').forEach(b=>b.onclick=()=>{
     const c=ROSTER.find(x=>x.id===b.dataset.id);
     (target.kind==='a'?ALLY:ENEMY)[target.i]=c; target=null; draw();
   });
+}
+function drawPicker(q){
+  document.querySelectorAll('.pkbox').forEach(b=>b.innerHTML='');
+  if(!target||!ROSTER) return;
+  const box=$(target.kind==='a'?'#pk-a':'#pk-e');
+  box.innerHTML=`<div class="pick">
+    <div class="roles">${ROLES.map(([k,lb])=>`<button data-r="${k}" class="${ROLE===k?'on':''}">${lb}</button>`).join('')}</div>
+    <input placeholder="${target.kind==='a'?'우리 팀':'상대 팀'} ${target.i+1}번 — 이름으로 찾기">
+    <div class="cnt"></div>
+    <div class="lst grid"></div></div>`;
+  const inp=box.querySelector('input');
+  inp.value=q||'';
+  let composing=false;
+  inp.addEventListener('compositionstart',()=>{composing=true;});
+  inp.addEventListener('compositionend',()=>{composing=false; fillPicker(box,inp.value);});
+  inp.addEventListener('input',()=>{ if(!composing) fillPicker(box,inp.value); });
+  box.querySelectorAll('.roles button').forEach(b=>b.onclick=()=>{
+    ROLE=b.dataset.r;
+    box.querySelectorAll('.roles button').forEach(x=>x.classList.toggle('on',x.dataset.r===ROLE));
+    fillPicker(box,inp.value);
+  });
+  fillPicker(box,inp.value);
 }
 
 function draw(){
