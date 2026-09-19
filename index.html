@@ -138,6 +138,19 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
  border:1.5px solid var(--good);display:block;flex:0 0 auto}
 .step>summary .pick i{font-style:normal;font-size:10.5px;font-weight:700;background:#2E2320;
  border:1px solid var(--good);color:#FFE3DA;border-radius:6px;padding:2px 6px;line-height:1.3}
+/* ── 밴 ── */
+.bl{font-size:9.5px;font-weight:800;color:var(--dim2);letter-spacing:.06em;margin:8px 0 5px}
+.bl:first-child{margin-top:2px}
+.chips.ban .chip.on{background:#1B2830;border-color:var(--bad)}
+.chips.ban .chip.on span{color:#9CC9DC;text-decoration:line-through}
+.chips.ban .chip.on img{border-color:var(--bad);filter:grayscale(1) brightness(.55)}
+.chips.ban .chip.mine span{color:var(--tx)}
+.chip.banned{opacity:.3;pointer-events:none}
+.chip.banned span{text-decoration:line-through}
+#s-ban>summary .n{background:#2A2A2A;color:var(--dim)}
+#s-ban>summary .pick img{width:21px;height:21px;border-color:var(--bad)}
+#s-ban>summary .pick i{background:#1B2830;border-color:var(--bad);color:#9CC9DC}
+#s-ban.done>summary .n{background:#22343D;color:var(--bad2)}
 /* ── 단계 2열 · 좁은 칩 ── */
 #steps{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-items:start}
 #steps>.step{margin-bottom:0}
@@ -167,6 +180,12 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
   <div id="hint" class="hint"></div>
 
   <div id="steps">
+  <details class="step" id="s-ban"><summary><span class="n">B</span>밴<span class="pick none">없음</span></summary>
+    <div class="body">
+      <div class="bl">원딜 — 양 팀 밴 전부</div><div class="chips grid ban" id="c-ban-adc"></div>
+      <div class="bl">서폿</div><div class="chips grid ban" id="c-ban-sup"></div>
+      <button class="reset" id="banclr" style="margin-top:9px">밴 전부 해제</button>
+    </div></details>
   <details class="step" id="s-sup"><summary><span class="n">1</span>우리 서폿<span class="pick none">미선택</span></summary>
     <div class="body"><div class="chips" id="c-sup"></div></div></details>
   <details class="step" id="s-eadc"><summary><span class="n">2</span>상대 원딜<span class="pick none">미선택</span></summary>
@@ -349,7 +368,7 @@ const SUPPORTS = [
 const E_ADC = [
   { k:'애쉬', ban:true, s:{yunara:-2,ezreal:-2,lucian:-2,vayne:-2,jinx:-2,xayah:-1,twitch:-1,ashe:0},
     why:{yunara:'유나라 하드 카운터',ezreal:'빠른 라인클리어로 이즈를 밀어붙인다',lucian:'사거리가 더 길어 루시안을 괴롭힌다',vayne:'성장형 원딜 — 애쉬가 견제로 성장을 막는다',jinx:'성장형 원딜 — 초반 압박에 그대로 눌린다',xayah:'사거리 길고 CC 있음'},
-    note:'네 풀이 성장형 위주라 구조적으로 불리 — 밴 1순위. 대안은 자야, 아니면 애쉬 미러(유불리 없음).' },
+    note:'네 풀이 성장형 위주라 구조적으로 불리 — 밴 1순위. 풀렸으면 자야가 대안.' },
   { k:'드레이븐', ban:true, s:{yunara:-2,ezreal:-2,vayne:-1,jinx:-2,xayah:0,twitch:-2,lucian:0,ashe:0},
     why:{ezreal:'강한 라인전으로 이즈 성장을 방해',jinx:'초반 압박에 징크스가 무너짐'},
     note:'라인전 최강급. 밴 후보.' },
@@ -538,6 +557,7 @@ const ICON={'유나라':'Yunara','이즈리얼':'Ezreal','진':'Jhin','루시안
 '카이사':'Kaisa','바루스':'Varus','사미라':'Samira','칼리스타':'Kalista','코르키':'Corki','스몰더':'Smolder','야스오':'Yasuo','아리':'Ahri'};
 const ico=n=>{const id=ICON[(n||'').replace(' ⚠','')]; return id?`<img src="${DD}${id}.png" alt="" loading="lazy" onerror="this.remove()">`:'';};
 const SEL={sup:null,eadc:null,esup:null,tr:new Set(),our:new Set()};
+const BANS=new Set();
 let HINTOFF=false; try{HINTOFF=localStorage.getItem('wrhint')==='0'}catch(_){}
 const MULTI={tr:1,our:1};
 const $=s=>document.querySelector(s);
@@ -552,14 +572,42 @@ Object.keys(SRC).forEach(k=>{
   const el=$('#c-'+k); if(GRID[k]) el.classList.add('grid');
   el.innerHTML = SRC[k].map((it,i)=>{
     const lb=LBL[k](it), sb=SUB[k](it);
-    return `<button class="chip" data-k="${k}" data-i="${i}" title="${sb||''}">${GRID[k]?ico(it.k):''}<span>${lb}</span>${sb&&!GRID[k]?`<small class="ex">${sb}</small>`:''}</button>`;
+    return `<button class="chip" data-k="${k}" data-i="${i}" data-nm="${(it.label||it.k||'').replace(' ⚠','')}" title="${sb||''}">${GRID[k]?ico(it.k):''}<span>${lb}</span>${sb&&!GRID[k]?`<small class="ex">${sb}</small>`:''}</button>`;
   }).join('');
 });
+
+/* ── 밴 ── */
+const uniq=a=>[...new Set(a)];
+const BAN_ADC=uniq([...CHAMPS.map(c=>c.name), ...E_ADC.map(x=>x.k)]);
+const BAN_SUP=uniq([...SUPPORTS.map(x=>x.k), ...E_SUP.map(x=>x.k)]);
+const MYPOOL=new Set(CHAMPS.map(c=>c.name));
+const banChips=(el,list)=>{el.innerHTML=list.map(n=>
+  `<button class="chip bn${BANS.has(n)?' on':''}${MYPOOL.has(n)?' mine':''}" data-ban="${n}">${ico(n)}<span>${n}</span></button>`).join('');};
+function drawBans(){
+  banChips($('#c-ban-adc'),BAN_ADC); banChips($('#c-ban-sup'),BAN_SUP);
+  document.querySelectorAll('.chip[data-nm]').forEach(b=>b.classList.toggle('banned',BANS.has(b.dataset.nm)));
+  const el=$('#s-ban'), p=el.querySelector('.pick'), a=[...BANS];
+  el.classList.toggle('done',a.length>0);
+  p.innerHTML = a.length ? a.slice(0,3).map(n=>ico(n)||`<i>${n}</i>`).join('')+(a.length>3?`<i>+${a.length-3}</i>`:'') : '없음';
+  p.classList.toggle('none',!a.length);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.chip.bn'); if(!b) return;
+  const n=b.dataset.ban;
+  if(BANS.has(n)) BANS.delete(n); else {
+    BANS.add(n);
+    ['sup','eadc','esup'].forEach(k=>{ if(SEL[k]!=null && SRC[k][SEL[k]].k===n){
+      SEL[k]=null; document.querySelectorAll(`.chip[data-k="${k}"]`).forEach(x=>x.classList.remove('on')); } });
+  }
+  drawBans(); render();
+});
+$('#banclr').onclick=()=>{BANS.clear(); drawBans(); render();};
 
 document.addEventListener('click',e=>{
   if(e.target.id==='hx'){ HINTOFF=true; try{localStorage.setItem('wrhint','0')}catch(_){}
     $('#hint').classList.add('off'); return; }
-  const b=e.target.closest('.chip'); if(!b) return;
+  const b=e.target.closest('.chip'); if(!b||b.classList.contains('bn')) return;
+  if(b.classList.contains('banned')) return;
   const k=b.dataset.k,i=+b.dataset.i;
   if(MULTI[k]){ SEL[k].has(i)?SEL[k].delete(i):SEL[k].add(i); b.classList.toggle('on'); }
   else{
@@ -570,8 +618,9 @@ document.addEventListener('click',e=>{
   render();
 });
 $('#reset').onclick=()=>{
-  SEL.sup=SEL.eadc=SEL.esup=null; SEL.tr.clear(); SEL.our.clear();
+  SEL.sup=SEL.eadc=SEL.esup=null; SEL.tr.clear(); SEL.our.clear(); BANS.clear();
   document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+  drawBans();
   document.querySelectorAll('.step').forEach(x=>x.open=false);
   render();
 };
@@ -592,14 +641,13 @@ function active(){
 }
 function evaluate(){
   const A=active();
-  return CHAMPS.map(c=>{
+  return CHAMPS.filter(c=>!BANS.has(c.name)).map(c=>{
     let sc=0; const rs=[];
     A.forEach(([pre,src])=>{
       const v=src.s?.[c.id]; if(v===undefined) return;
       sc+=v; const w=src.why?.[c.id];
       if(v!==0||w) rs.push({v,t:`<b>${pre}${src.label||src.k}</b>${w?' — '+w:''}`});
     });
-    if(SEL.eadc!=null && E_ADC[SEL.eadc].k===c.name) rs.push({v:0,t:'<b>미러전</b> — 유불리 없음, 숙련도 싸움'});
     return {c,sc,rs};
   }).sort((a,b)=>b.sc-a.sc||CHAMPS.indexOf(a.c)-CHAMPS.indexOf(b.c));
 }
@@ -637,7 +685,11 @@ function render(){
   /* 1픽 / 정보 없음 */
   $('#p-pick').classList.toggle('blind',!A.length);
   if(!A.length){
-    const b=BLIND.map(x=>({c:byId(x.id),why:x.why}));
+    const b=BLIND.map(x=>({c:byId(x.id),why:x.why})).filter(x=>x.c&&!BANS.has(x.c.name));
+    if(!b.length){ $('#hero').innerHTML=`<div class="hero badbox"><div class="lbl">밴</div>
+      <div class="big" style="font-size:18px">내 풀이 전부 밴당했다</div>
+      <div class="sub">밴 목록에서 하나 이상 풀어라.</div></div>`;
+      drawHint(); $('#rank').innerHTML=''; return; }
     $('#hero').innerHTML = `<div class="hero"><div class="lbl">1픽 · 정보 없을 때</div>
       <div class="big">${ico(b[0].c.name)}<span>${b[0].c.name}</span><em>${b[0].c.tier}</em></div>
       <div class="sub">${b[0].why}</div>
@@ -650,11 +702,14 @@ function render(){
     return;
   }
 
-  const mirName = SEL.eadc!=null ? E_ADC[SEL.eadc].k : null;
-  const nonMir = list.filter(r=>r.c.name!==mirName);
-  const mirRow = mirName ? list.find(r=>r.c.name===mirName) : null;
-  const top=(nonMir[0]||list[0]), best=top.sc;
-  const ties=nonMir.filter(r=>r.sc===best&&best>0);
+  if(!list.length){
+    $('#hero').innerHTML=`<div class="hero badbox"><div class="lbl">밴</div>
+      <div class="big" style="font-size:18px">내 풀이 전부 밴당했다</div>
+      <div class="sub">밴 목록에서 하나 이상 풀어라.</div></div>`;
+    drawHint(); $('#rank').innerHTML=''; return;
+  }
+  const top=list[0], best=top.sc;
+  const ties=list.filter(r=>r.sc===best&&best>0);
   let cls='hero', lbl='추천', sub='';
   if(best<=-1){ cls='hero badbox'; lbl='이 상황에 좋은 픽이 없음';
     sub='점수가 전부 마이너스다. 아래 1위가 그나마 덜 나쁜 선택이고, 밴이 가능하면 상대 픽을 자르는 게 낫다.'; }
@@ -672,7 +727,6 @@ function render(){
       <div class="big">${ico(top.c.name)}<span>${top.c.name}</span><em>${top.c.tier}</em></div>
       <div class="sub">${sub}</div>
       ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${ico(t.c.name)}${t.c.name}</span>`).join('')}</div>`:''}
-      ${mirRow?`<div class="alts"><b>미러</b><span>${ico(mirRow.c.name)}${mirRow.c.name} ${mirRow.sc>0?'+':''}${mirRow.sc}</span></div>`:''}
     </div>`;
   drawHint();
 
@@ -717,6 +771,7 @@ $('#champs').innerHTML = CHAMPS.map(c=>`<div class="cd">
   <div class="stat">${c.wr!=='—'?`승률 ${c.wr} · 픽률 ${c.pick} · 밴률 ${c.ban} · `:''}근거: ${c.src}</div>
 </div>`).join('');
 
+drawBans();
 render();
 </script>
 <script src="comp.js"></script>
