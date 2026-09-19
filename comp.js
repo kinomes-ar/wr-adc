@@ -69,7 +69,7 @@ Sylas:'사일러스',Vladimir:'블라디미르',Volibear:'볼리베어',Fiddlest
 
 let ROSTER=null, LOADING=false;
 const ES=new Array(5).fill(null), AS=new Array(5).fill(null);
-let target=null, MYC=null;
+let target=null, MYC=null, ROLE='';
 
 const el=(h)=>{const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild;};
 const $$=s=>document.querySelector(s);
@@ -88,6 +88,12 @@ document.head.appendChild(el(`<style>
 .pick{margin-top:9px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:10px}
 .pick input{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--line);
  background:#171717;color:var(--tx);font-size:13px;font-family:inherit;margin-bottom:8px}
+.roles{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.roles button{padding:7px 12px;border:1px solid var(--line);background:var(--card2);color:var(--dim);
+ border-radius:16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.roles button.on{background:#2E2320;border-color:var(--good);color:#FFE3DA}
+.pick .empty{font-size:11.5px;color:var(--dim2);padding:14px 2px;text-align:center}
+.pick .cnt{font-size:10px;color:var(--dim2);font-weight:700;margin:0 0 6px}
 .pick .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:6px;max-height:210px;overflow:auto}
 .pick button{border:none;background:none;padding:0;cursor:pointer}
 .pick button img{width:100%;aspect-ratio:1;border-radius:9px;object-fit:cover;display:block}
@@ -171,6 +177,7 @@ function draw(){
     if(kind==='a'&&i===0&&AS[0]&&AS[0].me){ setMy(MYC); return; }
     if(arr[i]){arr[i]=null; target=null;} else target={kind,i};
     draw(); analyze();
+    if(target) setTimeout(()=>{const pk=$$('#picker .pick'); if(pk) pk.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
   });
   const bn=n=>(typeof BANS!=='undefined')&&BANS.has(n);
   $$('#mych').innerHTML=CHAMPS.map(c=>`<button data-c="${c.id}" class="${MYC===c.id?'on':''}${bn(c.name)?' dis':''}">${ico(c.name)}<span>${c.name}</span></button>`).join('');
@@ -178,16 +185,28 @@ function draw(){
     b.onclick=()=>setMy(b.dataset.c); });
   drawPicker();
 }
+const ROLES=[['','전체'],['Tank','탱커'],['Fighter','전사'],['Assassin','암살자'],
+  ['Mage','메이지'],['Support','서폿'],['Marksman','원딜']];
 function drawPicker(q){
   const box=$$('#picker');
   if(!target||!ROSTER){box.innerHTML=''; return;}
   const used=new Set([...ES,...AS].filter(Boolean).map(c=>c.id));
   const banned=(typeof BANS!=='undefined')?BANS:new Set();
-  const list=ROSTER.filter(c=>!used.has(c.id)&&!banned.has(c.name)&&(!q||c.name.includes(q)||c.id.toLowerCase().includes(q.toLowerCase()))).slice(0,300);
-  box.innerHTML=`<div class="pick"><input placeholder="챔프 이름 검색" value="${q||''}">
-    <div class="grid">${list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')}</div></div>`;
+  const qq=(q||'').trim();
+  const list=ROSTER.filter(c=>!used.has(c.id)&&!banned.has(c.name)
+    &&(!ROLE||c.tags.includes(ROLE))
+    &&(!qq||c.name.includes(qq)||c.id.toLowerCase().includes(qq.toLowerCase())));
+  const who=target.kind==='e'?'상대 팀':'우리 팀';
+  box.innerHTML=`<div class="pick">
+    <div class="roles">${ROLES.map(([k,lb])=>`<button data-r="${k}" class="${ROLE===k?'on':''}">${lb}</button>`).join('')}</div>
+    <input placeholder="${who} ${target.i+1}번 — 이름으로 찾기" value="${qq}">
+    <div class="cnt">${list.length}명</div>
+    ${list.length?`<div class="grid">${list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')}</div>`
+      :'<div class="empty">조건에 맞는 챔프가 없다. 역할을 바꾸거나 검색어를 지워라.</div>'}</div>`;
   const inp=box.querySelector('input');
   inp.oninput=()=>{const v=inp.value; drawPicker(v); const n=$$('#picker input'); if(n){n.focus(); n.setSelectionRange(v.length,v.length);} };
+  box.querySelectorAll('.roles button').forEach(b=>b.onclick=()=>{
+    ROLE=b.dataset.r; drawPicker(inp.value); });
   box.querySelectorAll('.grid button').forEach(b=>b.onclick=()=>{
     const c=ROSTER.find(x=>x.id===b.dataset.id);
     (target.kind==='e'?ES:AS)[target.i]=c; target=null; draw(); analyze();
