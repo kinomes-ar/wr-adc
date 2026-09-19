@@ -41,14 +41,21 @@
   .hint .x{width:20px;height:20px;font-size:14px;top:2px;right:2px}
   .reset{margin-top:0;padding:8px;font-size:11.5px}
 
+  /* 1픽(선택 없음) — 순위 숨기고 단계에 공간을 준다 */
+  #p-pick.on.blind{grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1fr)}
+  #p-pick.on.blind #rank{display:none}
+  #p-pick.on.blind #steps{grid-column:2/-1;grid-template-columns:1fr 1fr;gap:6px}
+
   /* 단계 — 좁아진 폭에 맞춰 촘촘하게 */
-  .step{margin-bottom:6px}
+  #steps{grid-template-columns:1fr;gap:6px}
+  #hint.off ~ #reset{padding:13px;font-size:12.5px;margin-top:0}
+  .step{margin-bottom:0}
   .step>summary{padding:7px 9px;font-size:11.5px;gap:6px}
   .step>summary .n{width:17px;height:17px;font-size:9.5px}
   .step>summary .pick img{width:23px;height:23px}
   .step>summary .pick i{font-size:9.5px;padding:1px 5px}
   .body{padding:0 7px 8px}
-  .chips.grid{grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px}
+  .chips.grid{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:4px}
   .chips.grid .chip{padding:4px 1px 3px;font-size:8.5px;gap:2px}
   .chips.grid .chip img{width:32px;height:32px;border-width:1.5px}
   .chips:not(.grid) .chip{padding:5px 8px;font-size:11px;border-radius:14px}
