@@ -122,6 +122,20 @@ td.g{color:#8FD8AB;font-weight:600}td.r{color:#E39B9B;font-weight:600}
 .cd h4 img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid #2A3342}
 td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block;margin-bottom:3px}
 .ftr{margin-top:18px;font-size:10px;color:#4E5766;line-height:1.7;border-top:1px solid var(--line2);padding-top:11px}
+
+/* ── 선택 표시 = 이미지 ── */
+.step>summary{padding:9px 12px}
+.step>summary .pick{display:flex;align-items:center;justify-content:flex-end;gap:4px;
+ flex-wrap:wrap;max-width:62%;white-space:normal;overflow:visible;text-overflow:clip;min-height:26px}
+.step>summary .pick img{width:26px;height:26px;border-radius:50%;object-fit:cover;
+ border:1.5px solid #4276AB;display:block;flex:0 0 auto}
+.step>summary .pick i{font-style:normal;font-size:10.5px;font-weight:700;background:#23405E;
+ border:1px solid #4276AB;color:#EAF2FB;border-radius:6px;padding:2px 6px;line-height:1.3}
+/* ── 힌트 닫기 ── */
+.hint{position:relative;padding-right:32px}
+.hint.off{display:none}
+.hint .x{position:absolute;top:3px;right:4px;width:24px;height:24px;border:0;background:none;
+ color:var(--dim2);font-size:16px;line-height:1;font-family:inherit;border-radius:7px;padding:0}
 </style>
 <link rel="stylesheet" href="land.css">
 </head>
@@ -138,6 +152,7 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
   <div id="hero"></div>
   <div id="hint" class="hint"></div>
 
+  <div id="steps">
   <details class="step" id="s-sup"><summary><span class="n">1</span>우리 서폿<span class="pick none">미선택</span></summary>
     <div class="body"><div class="chips" id="c-sup"></div></div></details>
   <details class="step" id="s-eadc"><summary><span class="n">2</span>상대 원딜<span class="pick none">미선택</span></summary>
@@ -148,6 +163,7 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
     <div class="body"><div class="chips" id="c-tr"></div></div></details>
   <details class="step" id="s-our"><summary><span class="n">5</span>우리 조합<span class="pick none">미선택</span></summary>
     <div class="body"><div class="chips" id="c-our"></div></div></details>
+  </div>
 
   <button class="reset" id="reset">전부 초기화</button>
   <div class="rank" id="rank"></div>
@@ -447,7 +463,6 @@ const BLIND = [
   { id:'xayah', why:'R 무적이라 상대가 뭘 뽑든 죽을 각이 줄어든다. 받아치는 챔프라 판을 먼저 만들진 못함.' },
 ];
 
-
 /* ---------- 진 추가 (Wild Rift 7.2e 근거) ---------- */
 CHAMPS.splice(2,0,{ id:'jhin', name:'진', tier:'S', wr:'51.0%', pick:'15.0%', ban:'0.4%',
   tag:'버스트 · 장거리 · CC 연계',
@@ -500,6 +515,7 @@ _jp(OURS, {'우리팀에 이니시·탱커 있음':2,'우리팀에 CC가 거의 
  j.src='유튜브 공략(구버전 영상 — 매치업만 반영) + 통계 7.2e';
 })();
 
+
 const DD='https://ddragon.leagueoflegends.com/cdn/16.18.1/img/champion/';
 const ICON={'유나라':'Yunara','이즈리얼':'Ezreal','진':'Jhin','루시안':'Lucian','애쉬':'Ashe','베인':'Vayne','징크스':'Jinx','자야':'Xayah','트위치':'Twitch',
 '룰루':'Lulu','나미':'Nami','잔나':'Janna','카르마':'Karma','밀리오':'Milio','브라움':'Braum','쓰레쉬':'Thresh','레오나':'Leona','노틸러스':'Nautilus','알리스타':'Alistar',
@@ -508,6 +524,7 @@ const ICON={'유나라':'Yunara','이즈리얼':'Ezreal','진':'Jhin','루시안
 '카이사':'Kaisa','바루스':'Varus','사미라':'Samira','칼리스타':'Kalista','코르키':'Corki','스몰더':'Smolder','야스오':'Yasuo','아리':'Ahri'};
 const ico=n=>{const id=ICON[(n||'').replace(' ⚠','')]; return id?`<img src="${DD}${id}.png" alt="" loading="lazy" onerror="this.remove()">`:'';};
 const SEL={sup:null,eadc:null,esup:null,tr:new Set(),our:new Set()};
+let HINTOFF=false; try{HINTOFF=localStorage.getItem('wrhint')==='0'}catch(_){}
 const MULTI={tr:1,our:1};
 const $=s=>document.querySelector(s);
 const byId=id=>CHAMPS.find(c=>c.id===id);
@@ -526,6 +543,8 @@ Object.keys(SRC).forEach(k=>{
 });
 
 document.addEventListener('click',e=>{
+  if(e.target.id==='hx'){ HINTOFF=true; try{localStorage.setItem('wrhint','0')}catch(_){}
+    $('#hint').classList.add('off'); return; }
   const b=e.target.closest('.chip'); if(!b) return;
   const k=b.dataset.k,i=+b.dataset.i;
   if(MULTI[k]){ SEL[k].has(i)?SEL[k].delete(i):SEL[k].add(i); b.classList.toggle('on'); }
@@ -540,6 +559,7 @@ $('#reset').onclick=()=>{
   SEL.sup=SEL.eadc=SEL.esup=null; SEL.tr.clear(); SEL.our.clear();
   document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('.step').forEach(x=>x.open=false);
+  HINTOFF=false; try{localStorage.removeItem('wrhint')}catch(_){}
   render();
 };
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
@@ -575,11 +595,13 @@ const STEPS=[['sup','우리 서폿'],['eadc','상대 원딜'],['esup','상대 �
 function syncSteps(){
   STEPS.forEach(([k,name])=>{
     const el=$('#s-'+k), p=el.querySelector('.pick');
-    let txt='';
-    if(MULTI[k]) txt=[...SEL[k]].map(i=>(k==='tr'?TRAITS[i].label:OURS[i].k)).join(', ');
-    else if(SEL[k]!=null) txt=SRC[k][SEL[k]].k;
-    el.classList.toggle('done',!!txt);
-    p.textContent=txt||'미선택'; p.classList.toggle('none',!txt);
+    let html='',has=false;
+    if(MULTI[k]){ const a=[...SEL[k]]; has=a.length>0;
+      html=a.map(i=>`<i>${k==='tr'?TRAITS[i].label:OURS[i].k}</i>`).join(''); }
+    else if(SEL[k]!=null){ has=true; const nm=SRC[k][SEL[k]].k;
+      html=ico(nm)||`<i>${nm}</i>`; }
+    el.classList.toggle('done',has);
+    p.innerHTML = has?html:'미선택'; p.classList.toggle('none',!has);
   });
 }
 function nextHint(){
@@ -589,6 +611,11 @@ function nextHint(){
   return `다음에 <b>${left[0][1]}</b>가 정해지면 더 좁혀진다. 모르면 건너뛰어도 됨.`;
 }
 
+function drawHint(){
+  const h=$('#hint');
+  h.innerHTML=`<span>${nextHint()}</span><button class="x" id="hx" aria-label="닫기">×</button>`;
+  h.classList.toggle('off',HINTOFF);
+}
 function render(){
   syncSteps();
   const A=active(), list=evaluate();
@@ -601,7 +628,7 @@ function render(){
       <div class="big">${ico(b[0].c.name)}<span>${b[0].c.name}</span><em>${b[0].c.tier}</em></div>
       <div class="sub">${b[0].why}</div>
       <div class="alts"><b>대안</b>${b.slice(1).map(x=>`<span>${ico(x.c.name)}${x.c.name}</span>`).join('')}</div></div>`;
-    $('#hint').innerHTML = nextHint();
+    drawHint();
     $('#rank').innerHTML = `<h3>1픽 후보 근거</h3>` + b.map((x,i)=>`<div class="row">
       <div class="rk">${i+1}</div><div class="mid">
       <div class="nm">${ico(x.c.name)}${x.c.name}<span class="tier">${x.c.tier}</span></div>
@@ -633,7 +660,7 @@ function render(){
       ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${ico(t.c.name)}${t.c.name}</span>`).join('')}</div>`:''}
       ${mirRow?`<div class="alts"><b>미러</b><span>${ico(mirRow.c.name)}${mirRow.c.name} ${mirRow.sc>0?'+':''}${mirRow.sc}</span></div>`:''}
     </div>`;
-  $('#hint').innerHTML = nextHint();
+  drawHint();
 
   $('#rank').innerHTML = `<h3>전체 순위</h3>` + list.map((r,i)=>`
     <div class="row${r.sc<=-2?' no':''}">
