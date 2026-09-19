@@ -1,70 +1,112 @@
-/* 가로 모드 최적화 — 폰을 눕힌 상태(높이 540px 이하)에서만 적용 */
+/* 가로 모드 최적화 — 폰을 눕힌 상태(높이 540px 이하)에서만 적용
+   3단 패킹: 좌 추천/힌트/초기화 · 중 단계 · 우 순위 (각 단 독립 스크롤) */
 @media (orientation:landscape) and (max-height:540px){
 
-  body{font-size:14px;
-    padding:0 max(10px,env(safe-area-inset-left)) 14px max(10px,env(safe-area-inset-right))}
+  html,body{overflow:hidden}
+  body{font-size:13.5px;
+    padding:0 max(8px,env(safe-area-inset-left)) 0 max(8px,env(safe-area-inset-right))}
   .wrap{max-width:none}
 
   /* 헤더·탭 압축 — 세로 공간이 곧 전부 */
-  header{padding:7px 0 3px}
-  h1{font-size:13.5px}
-  header span{font-size:9.5px}
-  nav{padding:3px 0 6px;gap:4px}
-  nav button{padding:6px 4px;font-size:11.5px;border-radius:8px}
+  header{padding:5px 0 2px}
+  h1{font-size:13px}
+  header span{font-size:9px}
+  nav{padding:2px 0 5px;gap:4px}
+  nav button{padding:5px 4px;font-size:11px;border-radius:8px}
 
-  /* ── 픽 찾기: 2단 ── */
-  #p-pick.on{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
-  #hero,#hint,#reset,#rank{grid-column:1/-1}
+  /* ── 픽 찾기: 3단 ── */
+  #p-pick.on{display:grid;gap:7px;align-items:start;
+    grid-template-columns:minmax(0,.92fr) minmax(0,1fr) minmax(0,1.3fr);
+    grid-template-rows:minmax(0,1fr) auto auto}
+  #hero{grid-column:1;grid-row:1}
+  #hint{grid-column:1;grid-row:2}
+  #reset{grid-column:1;grid-row:3}
+  #steps{grid-column:2;grid-row:1/-1}
+  #rank{grid-column:3;grid-row:1/-1}
+  #p-pick.on{max-height:calc(100dvh - 62px);overflow:hidden}
+  #steps,#rank{max-height:calc(100dvh - 62px);overflow-y:auto;overscroll-behavior:contain}
+  #hero{height:100%;overflow-y:auto;overscroll-behavior:contain}
+  #steps::-webkit-scrollbar,#rank::-webkit-scrollbar,#hero::-webkit-scrollbar{width:0}
 
-  .hero{padding:10px 12px;margin-bottom:0;border-radius:12px}
+  .hero{padding:9px 11px;margin-bottom:0;border-radius:12px}
   .hero .lbl{font-size:9px;margin-bottom:3px}
-  .hero .big{font-size:20px;gap:9px}
-  .hero .big img{width:38px;height:38px}
-  .hero .sub{font-size:11px;margin-top:4px}
-  .alts{margin-top:7px;gap:5px}
-  .hint{margin-bottom:0;padding:7px 10px;font-size:11px}
+  .hero .big{font-size:17px;gap:8px}
+  .hero .big img{width:34px;height:34px}
+  .hero .big em{font-size:10px;margin-left:5px;padding:1px 5px}
+  .hero .sub{font-size:10.5px;margin-top:4px;line-height:1.5}
+  .alts{margin-top:6px;gap:4px}
+  .alts b{font-size:10px}
+  .alts span{font-size:11px;padding:3px 8px}
+  .hint{margin-bottom:0;padding:6px 26px 6px 9px;font-size:10.5px;line-height:1.5}
+  .hint .x{width:20px;height:20px;font-size:14px;top:2px;right:2px}
+  .reset{margin-top:0;padding:8px;font-size:11.5px}
 
-  .step{margin-bottom:0}
-  .step>summary{padding:9px 11px;font-size:12px}
-  .body{padding:0 9px 9px}
-  .chips.grid{grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:5px}
-  .chips.grid .chip{padding:5px 1px 4px;font-size:9px;gap:3px}
-  .chips.grid .chip img{width:36px;height:36px}
-  .reset{margin-top:2px;padding:8px;font-size:11.5px}
+  /* 단계 — 좁아진 폭에 맞춰 촘촘하게 */
+  .step{margin-bottom:6px}
+  .step>summary{padding:7px 9px;font-size:11.5px;gap:6px}
+  .step>summary .n{width:17px;height:17px;font-size:9.5px}
+  .step>summary .pick img{width:23px;height:23px}
+  .step>summary .pick i{font-size:9.5px;padding:1px 5px}
+  .body{padding:0 7px 8px}
+  .chips.grid{grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px}
+  .chips.grid .chip{padding:4px 1px 3px;font-size:8.5px;gap:2px}
+  .chips.grid .chip img{width:32px;height:32px;border-width:1.5px}
+  .chips:not(.grid) .chip{padding:5px 8px;font-size:11px;border-radius:14px}
 
-  /* 순위는 2열로 — 세로 스크롤 반으로 */
-  .rank{margin-top:6px}
-  .rank>h3{margin-bottom:5px}
-  #rank{display:block}
-  #rank>h3{grid-column:1/-1}
-  .rank .row{display:flex}
-  .row{padding:8px 10px;margin-bottom:5px;gap:7px}
-  .nm{font-size:13px}
-  .nm img{width:24px;height:24px}
-  .rs div{font-size:10.5px}
+  /* 순위 — 좁은 단에 맞게 */
+  .rank{margin-top:0}
+  .rank>h3{margin-bottom:5px;font-size:10px;position:sticky;top:0;background:var(--bg);padding:2px 0}
+  .row{padding:7px 9px;margin-bottom:5px;gap:6px;border-radius:9px}
+  .rk{flex:0 0 14px;font-size:11.5px}
+  .nm{font-size:12px;gap:5px}
+  .nm img{width:21px;height:21px}
+  .nm .tier{font-size:8px;margin-left:3px}
+  .rs{margin-top:4px;gap:2px}
+  .rs div{font-size:10px;line-height:1.4}
+  .sc{font-size:12px}
 
-  /* ── 챔프 상세: 2열 ── */
-  #champs{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
-  .cd{margin-bottom:0;padding:11px 12px}
+  /* ── 챔프 상세: 3열 ── */
+  #p-champ.on{max-height:calc(100dvh - 62px);overflow-y:auto}
+  #champs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;align-items:start}
+  .cd{margin-bottom:0;padding:9px 10px}
+  .cd h4{font-size:13px}.cd h4 img{width:28px;height:28px}
+  .cd .tag{font-size:10px;margin:2px 0 7px}
+  .cd dl{grid-template-columns:38px 1fr;gap:4px 7px;font-size:10.5px}
 
-  /* ── 조합 분석: 입력 왼쪽 / 결과 오른쪽 ── */
-  #p-cmp.on{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
-  .cmp h3,.cmp .note{grid-column:1/-1;margin:6px 0 5px}
-  #es,#as{grid-column:1/-1}
-  #picker{grid-column:1}
-  #cout{grid-column:2}
-  .slots{gap:5px}
-  .slot b{font-size:8px}
-  .pick{margin-top:0;padding:8px}
-  .pick .grid{grid-template-columns:repeat(auto-fill,minmax(48px,1fr));max-height:190px;gap:5px}
-  .adv{margin-top:0;margin-bottom:7px;padding:10px 11px}
-  .adv h4{font-size:11.5px;margin-bottom:5px}
-  .adv li{font-size:11px;margin-bottom:4px}
+  /* ── 조합 분석: 좌 슬롯 · 중 챔프검색 · 우 결과 ── */
+  #p-cmp.on{display:grid;gap:8px;align-items:start;
+    grid-template-columns:minmax(0,1fr) minmax(0,.85fr) minmax(0,1.15fr);
+    grid-template-rows:auto auto auto auto auto 1fr;
+    max-height:calc(100dvh - 62px);overflow:hidden}
+  #p-cmp>h3{grid-column:1;margin:3px 0 4px;font-size:10px}
+  #es,#as{grid-column:1}
+  #p-cmp .slots{gap:4px}
+  #picker{grid-column:2;grid-row:1/-1}
+  #picker:empty{display:none}
+  #picker:empty + #cout{grid-column:2/-1}
+  #cout{grid-column:3;grid-row:1/-1;max-height:calc(100dvh - 66px);overflow-y:auto}
+  #p-cmp .note{grid-column:1;grid-row:5;font-size:9.5px;margin-top:4px;line-height:1.45}
+  #p-cmp .slot{border-radius:9px}
+  #p-cmp .slot b{font-size:7.5px}
+  #p-cmp .pick{margin-top:0;padding:7px;border-radius:10px}
+  #p-cmp .pick input{padding:6px 9px;font-size:12px;margin-bottom:6px}
+  #p-cmp .pick .grid{grid-template-columns:repeat(auto-fill,minmax(42px,1fr));
+    max-height:calc(100dvh - 128px);gap:4px}
+  #p-cmp .pick button span{font-size:7.5px}
+  #p-cmp .adv{margin-top:0;margin-bottom:6px;padding:9px 10px;border-radius:10px}
+  #p-cmp .adv h4{font-size:11px;margin-bottom:5px}
+  #p-cmp .adv li{font-size:10.5px;margin-bottom:4px;line-height:1.5}
 
-  .ftr{margin-top:12px;padding-top:9px;font-size:9.5px}
+  .ftr{display:none}
+  #p-sheet.on{max-height:calc(100dvh - 62px);overflow-y:auto}
+  #p-sheet .ftr{display:block;margin-top:10px;padding-top:8px;font-size:9px}
+  table{font-size:10.5px}
+  td{padding:6px 4px}
+  td.c{width:46px;font-size:11.5px}
+  td.c img{width:26px;height:26px}
 }
 
-/* 가로인데 화면이 넓은 태블릿·데스크톱: 폭만 넓히고 2단까지는 안 감 */
+/* 가로인데 화면이 넓은 태블릿·데스크톱: 폭만 넓히고 3단까지는 안 감 */
 @media (orientation:landscape) and (min-height:541px){
   .wrap{max-width:720px}
 }
