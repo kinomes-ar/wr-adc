@@ -68,8 +68,8 @@ Orianna:'오리아나',Veigar:'베이가',Ziggs:'직스',Taric:'타릭',Aatrox:'
 Sylas:'사일러스',Vladimir:'블라디미르',Volibear:'볼리베어',Fiddlesticks:'피들스틱',Annie:'애니',Yone:'요네'};
 
 let ROSTER=null, LOADING=false;
-const ES=new Array(5).fill(null), AS=new Array(4).fill(null);
-let target=null;
+const ES=new Array(5).fill(null), AS=new Array(5).fill(null);
+let target=null, MYC=null;
 
 const el=(h)=>{const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild;};
 const $$=s=>document.querySelector(s);
@@ -78,7 +78,6 @@ const $$=s=>document.querySelector(s);
 document.head.appendChild(el(`<style>
 .cmp h3{font-size:11px;font-weight:800;color:var(--dim2);letter-spacing:.06em;margin:14px 0 7px}
 .slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.slots.ally{grid-template-columns:repeat(4,1fr)}
 .slot{aspect-ratio:1;border:1px dashed var(--line);border-radius:14px;background:var(--card);
  display:grid;place-items:center;font-size:19px;color:#4A4A4A;position:relative;overflow:hidden;padding:0}
 .slot.on{border-style:solid;border-color:var(--good)}
@@ -101,6 +100,15 @@ document.head.appendChild(el(`<style>
 .adv li b{color:var(--good2);font-weight:700}
 .adv li.w:before{background:var(--bad)}.adv li.g:before{background:var(--good)}
 .cmp .note{font-size:10.5px;color:var(--dim2);line-height:1.55;margin-top:9px}
+#mych{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+#mych button{border:none;background:none;padding:0;cursor:pointer;font-family:inherit}
+#mych img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;display:block;
+ border:2px solid #2A2A2A;filter:saturate(.45) brightness(.72)}
+#mych button.on img{border-color:var(--good2);filter:none}
+#mych span{display:block;font-size:9px;color:var(--dim);margin-top:3px;line-height:1.1;font-weight:600}
+#mych button.on span{color:var(--tx)}
+.adv h4 .me{font-size:10px;font-weight:700;color:var(--dim2);margin-left:6px}
+.adv .sub{font-size:10.5px;color:var(--dim2);margin-top:7px;line-height:1.5}
 </style>`));
 
 /* 탭 + 패널 */
@@ -109,7 +117,8 @@ const btn=el('<button data-p="cmp">조합 분석</button>'); nav.appendChild(btn
 const panel=el('<section class="panel cmp" id="p-cmp"></section>');
 document.querySelector('#p-champ').after(panel);
 panel.innerHTML=`<h3>상대 팀 5명</h3><div class="slots" id="es"></div>
-<h3>우리 팀 (원딜 제외 4명)</h3><div class="slots ally" id="as"></div>
+<h3>우리 팀 5명 (나 포함)</h3><div class="slots ally" id="as"></div>
+<h3>내 챔프</h3><div id="mych"></div>
 <div id="picker"></div><div id="cout"></div>
 <div class="note">챔프 분류는 Riot Data Dragon에서 실시간으로 받아온다. 추천 원딜은 픽 찾기 탭과 같은 점수 엔진을 쓰되, 조합 특성을 자동으로 판정한다.</div>`;
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
@@ -142,7 +151,11 @@ function draw(){
     if(arr[i]){arr[i]=null; target=null;} else target={kind,i};
     draw(); analyze();
   });
-  drawPicker(); 
+  $$('#mych').innerHTML=CHAMPS.map(c=>`<button data-c="${c.id}" class="${MYC===c.id?'on':''}">${ico(c.name)}<span>${c.name}</span></button>`).join('');
+  $$('#mych').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    MYC = MYC===b.dataset.c ? null : b.dataset.c; draw(); analyze();
+  });
+  drawPicker();
 }
 function drawPicker(q){
   const box=$$('#picker');
@@ -159,18 +172,49 @@ function drawPicker(q){
   });
 }
 
+/* 챔프별 아이템·운영 보정 — 일반 규칙을 챔프 특성으로 덮어쓴다 */
+const GEN={
+ tank:'<b>도미닉의 인사</b> — 방어구 관통',
+ heal:'<b>필멸자의 인사</b> — 치유 감소. 없으면 못 녹인다',
+ ap:'<b>멜모셔스의 아귀</b> — 마법 피해 방어막',
+ ad:'<b>죽음의 무도</b> — 피해를 시간으로 분산',
+ dive:'<b>수호천사</b> — 한타에서 한 번 더 살아난다',
+ cc:'<b>헤르메스의 발걸음</b> — 강인함으로 묶이는 시간을 줄인다',
+ group:'<b>룬안의 허리케인</b> — 뭉치는 조합에 광역 딜'};
+const OVR={
+ yunara:{tank:'<b>공속템 우선</b> — 패시브가 치명타를 마법 피해로 바꿔 방어구를 이미 우회한다. 방관은 낭비',
+        dive:'<b>수호천사</b> 또는 탈진 — 초월 쿨 사이가 가장 취약하다'},
+ ezreal:{tank:'<b>도미닉의 인사</b> — 단 Q는 치명타가 안 터진다. 치명타템은 절대 금지',
+        ap:'<b>멜모셔스의 아귀</b> — 이즈리얼 AP 대응 1순위',
+        dive:'<b>얼어붙은 건틀릿</b> — 붙는 챔프를 묶어 E로 빠질 시간을 번다'},
+ vayne:{tank:'<b>공속템(위츠엔드·유령무희)</b> — W 은화살이 이미 최대 체력 비례 고정 피해다. 방관 필요 없음',
+        dive:'<b>수호천사</b> — Q는 도주기가 아니라 회피기다. 물리면 못 뺀다'},
+ twitch:{tank:'<b>룬안의 허리케인</b> — 맹독이 고정 피해라 탱커엔 이미 강하다. 스택 속도를 올려라',
+        group:'<b>룬안의 허리케인</b> — 궁 관통과 겹쳐 한타 광역이 폭발한다'},
+ jinx:{group:'<b>룬안의 허리케인</b> — 로켓런처 광역과 겹친다. 사실상 전용템',
+       dive:'<b>수호천사</b> — 이동기가 전혀 없다. 한 번 물리면 끝'},
+ lucian:{heal:'<b>필멸자의 인사</b> — 패시브가 평타를 2번 때려 적중 시 효과가 2배로 들어간다',
+        tank:'<b>몰왕검 → 도미닉</b> — 초반에 굴려야 하는 챔프다. 후반 템으로 도망가지 마라'},
+ ashe:{cc:'<b>치명타 확률</b> — W가 챔피언에게 확정 치명타라 치명타템이 곧 둔화 2배다',
+       dive:'<b>헤르메스 + 수호천사</b> — 대시가 아예 없다. 물리면 그대로 죽는다'},
+ xayah:{dive:'<b>속사포</b> — R 무적이 이미 진입 대응이다. 깃털 회전을 올리는 게 더 낫다',
+        group:'<b>치명타템</b> — 깃털 3개 속박이 광역으로 터진다'},
+ jhin:{cc:'<b>유령무희·질풍검</b> — 진은 이속이 곧 공격력이다. 헤르메스보다 이속템',
+       tank:'<b>도미닉의 인사</b> — 4번째 탄 확정 치명타에 방관을 얹는다'}};
+
 function analyze(){
-  const out=$$('#cout'); const en=ES.filter(Boolean);
+  const out=$$('#cout'); const en=ES.filter(Boolean), al=AS.filter(Boolean);
   if(en.length<2){out.innerHTML=''; return;}
   const has=t=>en.filter(c=>c.tags.includes(t)).length;
   const tanks=has('Tank'), assassins=has('Assassin');
   const ap=en.filter(c=>c.tags.includes('Mage')||(c.info.magic||0)>=7).length;
   const ad=en.filter(c=>(c.info.attack||0)>=7).length;
   const ccN=en.filter(c=>CC.includes(c.id)).length;
-  const healN=[...en,...AS.filter(Boolean)].filter(c=>HEAL.includes(c.id)).length;
   const heEn=en.filter(c=>HEAL.includes(c.id)).length;
+  const alTank=al.filter(c=>c.tags.includes('Tank')).length;
+  const alHeal=al.filter(c=>HEAL.includes(c.id)).length;
+  const alEng=al.filter(c=>CC.includes(c.id)&&c.tags.includes('Tank')).length;
 
-  /* 조합 특성 → 기존 엔진의 TRAITS 자동 판정 */
   const flags={dive:assassins>=2, tank:tanks>=2, cc:ccN>=3, immobile:en.filter(c=>['Garen','Nasus','Darius','Annie','Soraka','Veigar','DrMundo','Malphite'].includes(c.id)).length>=2};
   const scores=CHAMPS.map(c=>{
     let sc=0, rs=[];
@@ -179,25 +223,57 @@ function analyze(){
     return {c,sc,rs};
   }).sort((a,b)=>b.sc-a.sc||CHAMPS.indexOf(a.c)-CHAMPS.indexOf(b.c));
 
-  const warn=en.filter(c=>THREAT[c.id]).map(c=>`<li class="w"><b>${c.name}</b> ${THREAT[c.id]}</li>`).join('');
-  const items=[];
-  if(tanks>=2) items.push(`<li class="g"><b>방어구 관통</b> 도미닉의 인사 / Serylda's Grudge — 상대 탱커 ${tanks}명</li>`);
-  if(heEn>=1) items.push(`<li class="g"><b>치유 감소</b> Mortal Reminder — 상대에 회복 챔프가 있다 (없으면 못 녹인다)</li>`);
-  if(ap>=3) items.push(`<li class="g"><b>멜모셔스의 아귀</b> — 상대 AP ${ap}명, 마법 피해 방어막</li>`);
-  if(ad>=3) items.push(`<li class="g"><b>죽음의 무도</b> — 상대 AD ${ad}명, 피해를 분산시킨다</li>`);
-  if(assassins>=1) items.push(`<li class="g"><b>수호천사</b> — 진입 암살 대비. 한타에서 한 번 더 살아난다</li>`);
-  if(ccN>=3) items.push(`<li class="g"><b>헤르메스의 발걸음</b> — CC ${ccN}개, 강인함으로 묶이는 시간을 줄인다</li>`);
-  if(tanks>=2) items.push(`<li class="g"><b>룬안의 허리케인</b> — 뭉치는 조합에 광역 딜</li>`);
-  if(!items.length) items.push(`<li><b>이오니아 장화</b> — 뚜렷한 카운터 요소가 없다. 공격적으로 가도 된다</li>`);
-
   const top=scores[0];
-  out.innerHTML=`<div class="adv"><h4>이 조합에 추천</h4>
+  const me=MYC?CHAMPS.find(c=>c.id===MYC):null;
+  const stat=`상대 탱커 ${tanks} · 암살자 ${assassins} · AP ${ap} · AD ${ad} · CC ${ccN}`;
+
+  /* ── 추천 카드 ── */
+  let html=`<div class="adv"><h4>이 조합에 추천</h4>
     <div class="nm" style="font-size:17px">${ico(top.c.name)}${top.c.name}<span class="tier">${top.c.tier}</span></div>
     ${top.rs.length?`<ul style="margin-top:7px">${top.rs.map(r=>`<li class="${r.v>0?'g':'w'}">${r.t}</li>`).join('')}</ul>`:''}
-    <ul style="margin-top:6px">${scores.slice(1,4).map(s=>`<li>${s.c.name} ${s.sc>0?'+':''}${s.sc}</li>`).join('')}</ul>
-    <div style="font-size:10.5px;color:var(--dim2);margin-top:7px">상대 탱커 ${tanks} · 암살자 ${assassins} · AP ${ap} · AD ${ad} · CC ${ccN}</div></div>
-    ${warn?`<div class="adv"><h4>플레이 유의사항</h4><ul>${warn}</ul></div>`:''}
-    <div class="adv"><h4>아이템 방향</h4><ul>${items.join('')}</ul>
-    <div style="font-size:10.5px;color:var(--dim2);margin-top:6px">코어 빌드는 챔프 상세 탭 참고. 위는 상대 조합에 맞춘 추가·교체 방향이다.</div></div>`;
+    <ul style="margin-top:6px">${scores.slice(1,4).map(x=>`<li>${x.c.name} ${x.sc>0?'+':''}${x.sc}</li>`).join('')}</ul>
+    <div class="sub">${stat}</div>
+    ${me?'':'<div class="sub">위에서 <b>내 챔프</b>를 고르면 운영 방법과 아이템이 나온다.</div>'}</div>`;
+
+  /* ── 운영 방법 (내 챔프 기준) ── */
+  if(me){
+    const play=[];
+    play.push(`<li><b>핵심</b> ${me.core}</li>`);
+    play.push(`<li class="w"><b>약점</b> ${me.weak}</li>`);
+    if(flags.dive) play.push(`<li class="w">상대 암살자 ${assassins}명 — 한타 시작 전에 점멸·생존기가 살아 있어야 한다. 사이드 혼자 가지 마라</li>`);
+    if(flags.tank) play.push(`<li>상대 탱커 ${tanks}명 — 앞라인을 억지로 녹이려 하지 말고 뒤로 넘어오는 딜러부터 잘라라</li>`);
+    if(ccN>=3) play.push(`<li class="w">CC ${ccN}개 — 한 번 걸리면 연계로 끝난다. 아군보다 반 발 뒤에서 딜하라</li>`);
+    if(heEn>=1) play.push(`<li class="w">상대에 회복 챔프 — 치유 감소 없이는 장기전에서 못 이긴다</li>`);
+    if(al.length){
+      if(alTank===0) play.push(`<li class="w">우리 팀에 앞라인이 없다 — 라인전부터 안전 우선. 먼저 싸움을 열지 마라</li>`);
+      if(alHeal>=1) play.push(`<li class="g">아군에 보호·회복 챔프가 있다 — 평소보다 한 발 앞에서 딜해도 된다</li>`);
+      if(alEng>=1) play.push(`<li class="g">아군 이니시가 있다 — 진입 타이밍을 미리 읽고 딜 각을 잡아둬라</li>`);
+    }
+    if(me.tip) play.push(`<li><b>팁</b> ${me.tip}</li>`);
+    html+=`<div class="adv"><h4>${me.name} 운영 방법<span class="me">내 챔프</span></h4><ul>${play.join('')}</ul></div>`;
+  }
+
+  /* ── 상대 위협 ── */
+  const warn=en.filter(c=>THREAT[c.id]).map(c=>`<li class="w"><b>${c.name}</b> ${THREAT[c.id]}</li>`).join('');
+  if(warn) html+=`<div class="adv"><h4>플레이 유의사항</h4><ul>${warn}</ul></div>`;
+
+  /* ── 아이템 ── */
+  const sit=[];
+  const pick=k=>(me&&OVR[me.id]&&OVR[me.id][k])||GEN[k];
+  if(tanks>=2) sit.push(pick('tank'));
+  if(heEn>=1) sit.push(pick('heal'));
+  if(ap>=3) sit.push(pick('ap'));
+  if(ad>=3) sit.push(pick('ad'));
+  if(assassins>=1) sit.push(pick('dive'));
+  if(ccN>=3) sit.push(pick('cc'));
+  if(tanks>=2||ccN>=3) sit.push(pick('group'));
+  const uniq=[...new Set(sit)];
+  html+=`<div class="adv"><h4>아이템${me?` — ${me.name}`:''}</h4>
+    ${me?`<ul><li class="g"><b>코어</b> ${me.build}</li><li><b>룬</b> ${me.runes}</li></ul>
+      <div class="sub">상대 조합에 맞춘 추가·교체</div>`:''}
+    <ul${me?' style="margin-top:5px"':''}>${uniq.length?uniq.map(x=>`<li class="g">${x}</li>`).join(''):'<li><b>이오니아 장화</b> — 뚜렷한 카운터 요소가 없다. 공격적으로 가도 된다</li>'}</ul>
+    ${me?'':'<div class="sub">내 챔프를 고르면 그 챔프 기준으로 다시 계산한다.</div>'}</div>`;
+
+  out.innerHTML=html;
 }
 })();
