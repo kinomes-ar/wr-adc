@@ -95,6 +95,11 @@ nav button.on{background:var(--good);color:#fff;border-color:var(--good);font-we
 /* ── 치트 / 상세 ── */
 table{width:100%;border-collapse:collapse;font-size:11.5px}
 td{padding:9px 5px;border-bottom:1px solid var(--line2);vertical-align:top}
+th{position:sticky;top:42px;background:var(--bg);z-index:5;text-align:left;font-size:10.5px;
+ font-weight:800;padding:8px 5px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.g{color:#E88F79}th.r{color:#7FB6CE}
+td i{font-style:normal;font-size:8.5px;font-weight:800;color:var(--dim2);background:var(--card2);
+ border:1px solid var(--line);border-radius:4px;padding:1px 4px;margin-right:4px;vertical-align:1px}
 td.c{font-weight:900;font-size:13px;width:54px;white-space:nowrap}
 td.g{color:#E88F79;font-weight:600}td.r{color:#7FB6CE;font-weight:600}
 .cd{border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:8px;background:var(--card)}
@@ -180,7 +185,7 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
 
 <section class="panel" id="p-sheet">
   <table id="sheet"></table>
-  <div class="ftr">초록 = 확실히 켜지는 조건 / 빨강 = 확실히 꺼지는 조건. 충돌하면 상대 조합이 서폿보다 우선.</div>
+  <div class="ftr">◎ 이럴 때 고른다 = 이 조건이면 확실히 강해진다 / ✕ 이럴 때 피한다 = 확실히 약해진다. 둘이 충돌하면 상대 조합이 서폿보다 우선.<br>태그 — <b>폿</b> 아군 서폿 · <b>적딜</b> 상대 원딜 · <b>적폿</b> 상대 서폿 · <b>조합</b> 상대 조합 특성 · <b>아군</b> 아군 조합 특성</div>
 </section>
 
 <section class="panel" id="p-champ"><div id="champs"></div></section>
@@ -682,19 +687,24 @@ function render(){
     </div>`).join('');
 }
 
-/* 치트시트 */
+/* 치트시트 — 카테고리 태그로 묶어 중복어 제거 */
 (function(){
-  const on={},off={}; CHAMPS.forEach(c=>{on[c.id]=[];off[c.id]=[];});
-  const push=(src,pre)=>src.forEach(x=>CHAMPS.forEach(c=>{
-    const v=x.s?.[c.id];
-    if(v>=2) on[c.id].push(pre+(x.label||x.k));
-    else if(v<=-2) off[c.id].push(pre+(x.label||x.k));
-  }));
-  push(SUPPORTS,'우리 '); push(E_ADC,'상대 '); push(E_SUP,'상대폿 '); push(TRAITS,''); push(OURS,'');
-  $('#sheet').innerHTML = CHAMPS.map(c=>`<tr>
+  const CATS=[[SUPPORTS,'폿'],[E_ADC,'적딜'],[E_SUP,'적폿'],[TRAITS,'조합'],[OURS,'아군']];
+  const on={},off={}; CHAMPS.forEach(c=>{on[c.id]={};off[c.id]={};});
+  CATS.forEach(([src,cat])=>src.forEach(x=>CHAMPS.forEach(c=>{
+    const v=x.s?.[c.id]; if(v===undefined) return;
+    const nm=(x.label||x.k).replace(' ⚠','');
+    if(v>=2)(on[c.id][cat]=on[c.id][cat]||[]).push(nm);
+    else if(v<=-2)(off[c.id][cat]=off[c.id][cat]||[]).push(nm);
+  })));
+  const fmt=o=>{const ks=CATS.map(x=>x[1]).filter(k=>o[k]);
+    return ks.length?ks.map(k=>`<i>${k}</i>${o[k].join('·')}`).join('<br>'):'—';};
+  $('#sheet').innerHTML =
+    `<thead><tr><th>챔프</th><th class="g">◎ 이럴 때 고른다</th><th class="r">✕ 이럴 때 피한다</th></tr></thead><tbody>`
+    + CHAMPS.map(c=>`<tr>
     <td class="c">${ico(c.name)}${c.name}<br><span style="font-size:9px;color:var(--warn);font-weight:700">${c.tier}</span></td>
-    <td class="g">${on[c.id].join(' · ')||'—'}</td>
-    <td class="r">${off[c.id].join(' · ')||'—'}</td></tr>`).join('');
+    <td class="g">${fmt(on[c.id])}</td>
+    <td class="r">${fmt(off[c.id])}</td></tr>`).join('') + '</tbody>';
 })();
 
 /* 챔프 상세 */
