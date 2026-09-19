@@ -25,7 +25,9 @@
   #rank{grid-column:3;grid-row:1/-1}
   #p-pick.on{height:calc(100dvh - 62px - var(--st));overflow:hidden}
   #steps,#rank{height:100%;overflow-y:auto;overscroll-behavior:contain}
-  #hero{height:100%;overflow-y:auto;overscroll-behavior:contain}
+  #hero{height:100%;overflow-y:auto;overscroll-behavior:contain;
+    display:flex;flex-direction:column;gap:7px}
+  #hero>.hero{width:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
   #steps::-webkit-scrollbar,#rank::-webkit-scrollbar,#hero::-webkit-scrollbar{width:0}
 
   .hero{padding:9px 11px;margin-bottom:0;border-radius:12px}
@@ -57,8 +59,6 @@
   #p-pick.on.blind #steps:has(.step[open])>.step:not([open]){display:none}
   #p-pick.on.blind #steps:has(.step[open])>.step[open]>summary{flex:0 0 auto;padding:9px 12px;font-size:12.5px}
   /* 왼쪽 단(추천/힌트/초기화)도 같이 커진다 */
-  #p-pick.on.blind #hero{display:flex;flex-direction:column;justify-content:center}
-  #p-pick.on.blind #hero>.hero{width:100%}
   #p-pick.on.blind .hero .big{font-size:20px}
   #p-pick.on.blind .hero .big img{width:42px;height:42px}
   #p-pick.on.blind .hero .sub{font-size:11.5px}
