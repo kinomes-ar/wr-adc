@@ -157,9 +157,9 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
 .chip.banned{opacity:.3;pointer-events:none}
 .chip.banned span{text-decoration:line-through}
 #s-ban>summary .n{background:#2A2A2A;color:var(--dim)}
-#s-ban>summary .pick{flex-wrap:nowrap;white-space:nowrap}
-#s-ban>summary .pick .cnt{font-weight:800;color:#9CC9DC;letter-spacing:.01em}
-#s-ban>summary .pick .cnt.ok{color:var(--good2)}
+.step>summary .pick{flex-wrap:nowrap;white-space:nowrap}
+.step>summary .pick .cnt{font-weight:800;color:#9CC9DC;letter-spacing:.01em}
+.step>summary .pick .cnt.ok{color:var(--good2)}
 #s-ban.done>summary .n{background:#22343D;color:var(--bad2)}
 #s-ban.fin>summary .n{background:#3B2A25;color:var(--good2)}
 .chips.tier{display:flex;gap:6px}
@@ -184,6 +184,52 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
 .hint.off{display:none}
 .hint .x{position:absolute;top:3px;right:4px;width:24px;height:24px;border:0;background:none;
  color:var(--dim2);font-size:16px;line-height:1;font-family:inherit;border-radius:7px;padding:0}
+
+/* ── 팀 슬롯 · 챔프 고르기 · 조언 카드 ── */
+.srch{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--line);
+ background:#171717;color:var(--tx);font-size:13px;font-family:inherit;margin-bottom:7px}
+.slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.slot{aspect-ratio:1;border:1px dashed var(--line);border-radius:14px;background:var(--card2);
+ display:grid;place-items:center;font-size:17px;font-weight:800;color:#5A5A5A;position:relative;overflow:hidden;
+ padding:0;font-family:inherit}
+.slot.on{border-style:solid;border-color:var(--good)}
+.slot img{width:100%;height:100%;object-fit:cover}
+.slot b{position:absolute;bottom:0;left:0;right:0;background:rgba(15,15,15,.84);font-size:8.5px;
+ font-weight:700;padding:2px 1px;color:var(--tx2);line-height:1.1}
+.slot.sel{border-color:var(--good2);border-style:solid;box-shadow:0 0 0 2px rgba(224,115,92,.35)}
+.slot.me{border-color:var(--good2)}
+.slot.me:after{content:'나';position:absolute;top:2px;left:3px;font-size:8px;font-weight:800;
+ color:#fff;background:var(--good);border-radius:4px;padding:0 3px;line-height:1.4}
+.pick{margin-top:9px;border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:10px}
+.pick input{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--line);
+ background:#171717;color:var(--tx);font-size:13px;font-family:inherit;margin-bottom:8px}
+.roles{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.roles button{padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--dim);
+ border-radius:16px;font-size:12px;font-weight:700;font-family:inherit}
+.roles button.on{background:#2E2320;border-color:var(--good);color:#FFE3DA}
+.pick .cnt{font-size:10px;color:var(--dim2);font-weight:700;margin:0 0 6px}
+.pick .empty{font-size:11.5px;color:var(--dim2);padding:14px 2px;text-align:center}
+.pick .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:6px;max-height:230px;overflow:auto}
+.pick .grid button{border:none;background:none;padding:0;font-family:inherit}
+.pick .grid button img{width:100%;aspect-ratio:1;border-radius:9px;object-fit:cover;display:block}
+.pick .grid button span{display:block;font-size:8.5px;color:var(--dim);margin-top:2px;line-height:1.1}
+#mych{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+#mych button{border:none;background:none;padding:0;font-family:inherit}
+#mych img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;display:block;
+ border:2px solid #2A2A2A;filter:saturate(.45) brightness(.72)}
+#mych button.on img{border-color:var(--good2);filter:none}
+#mych span{display:block;font-size:9px;color:var(--dim);margin-top:3px;line-height:1.1;font-weight:600}
+#mych button.on span{color:var(--tx)}
+#mych button.dis{opacity:.28;pointer-events:none}
+#mych button.dis span{text-decoration:line-through}
+.adv{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:12px 13px;margin-bottom:8px}
+.adv h4{font-size:12.5px;font-weight:800;margin-bottom:7px;color:#fff}
+.adv li{font-size:11.5px;line-height:1.55;color:var(--tx2);margin-bottom:5px;list-style:none;
+ padding-left:11px;position:relative}
+.adv li:before{content:'';position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:#4A4A4A}
+.adv li b{color:var(--good2);font-weight:700}
+.adv li.w:before{background:var(--bad)}.adv li.g:before{background:var(--good)}
+.adv .sub{font-size:10.5px;color:var(--dim2);margin-top:7px;line-height:1.5}
 </style>
 <link rel="stylesheet" href="land.css">
 </head>
@@ -208,21 +254,35 @@ td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block
         <button class="chip tg" data-max="6">다이아 이하<small>팀당 3개 · 총 6밴</small></button>
         <button class="chip tg" data-max="10">마스터 이상<small>1인 1밴 · 총 10밴</small></button>
       </div>
-      <div class="bl">원딜 — 양 팀 밴 전부<span id="bancnt"></span></div><div class="chips grid ban" id="c-ban-adc"></div>
-      <div class="bl">서폿</div><div class="chips grid ban" id="c-ban-sup"></div>
+      <div class="bl">전 챔피언 — 양 팀 밴 전부<span id="bancnt"></span></div>
+      <input class="srch" id="bansrch" placeholder="챔프 이름 검색">
+      <div class="chips grid ban" id="c-ban"></div>
       <button class="done" id="bandone">밴 완료 — 남은 풀에서 추천 받기</button>
       <button class="reset" id="banclr">밴 전부 해제</button>
     </div></details>
-  <details class="step" id="s-sup"><summary><span class="n">1</span>우리 서폿<span class="pick none">미선택</span></summary>
-    <div class="body"><div class="chips" id="c-sup"></div></div></details>
-  <details class="step" id="s-eadc"><summary><span class="n">2</span>상대 원딜<span class="pick none">미선택</span></summary>
-    <div class="body"><div class="chips" id="c-eadc"></div></div></details>
-  <details class="step" id="s-esup"><summary><span class="n">3</span>상대 서폿<span class="pick none">미선택</span></summary>
-    <div class="body"><div class="chips" id="c-esup"></div></div></details>
-  <details class="step" id="s-tr"><summary><span class="n">4</span>상대 조합<span class="pick none">미선택</span></summary>
-    <div class="body"><div class="chips" id="c-tr"></div></div></details>
-  <details class="step" id="s-our"><summary><span class="n">5</span>우리 조합<span class="pick none">미선택</span></summary>
-    <div class="body"><div class="chips" id="c-our"></div></div></details>
+
+  <details class="step" id="s-ally"><summary><span class="n">1</span>우리 팀<span class="pick none">미선택</span></summary>
+    <div class="body">
+      <div class="bl">내 챔프 — 고르면 1번 칸에 들어간다</div>
+      <div id="mych"></div>
+      <div class="bl">우리 팀 5명 (나 포함)</div>
+      <div class="slots" id="as"></div>
+      <div class="pkbox" id="pk-a"></div>
+    </div></details>
+
+  <details class="step" id="s-enemy"><summary><span class="n">2</span>상대 팀<span class="pick none">미선택</span></summary>
+    <div class="body">
+      <div class="bl">상대 팀 5명</div>
+      <div class="slots" id="es"></div>
+      <div class="pkbox" id="pk-e"></div>
+    </div></details>
+
+  <details class="step" id="s-tr"><summary><span class="n">3</span>조합 특성<span class="pick none">없음</span></summary>
+    <div class="body">
+      <div class="bl">상대 조합 — 넣은 챔프로 자동 판정, 눌러서 수정</div><div class="chips" id="c-tr"></div>
+      <div class="bl">우리 조합</div><div class="chips" id="c-our"></div>
+      <button class="reset" id="trauto" style="margin-top:9px">자동 판정으로 되돌리기</button>
+    </div></details>
   </div>
 
   <button class="reset" id="reset">전부 초기화</button>
@@ -384,6 +444,8 @@ const SUPPORTS = [
     why:{jinx:'공식 시너지 1순위 — 속박에 로켓·지뢰 풀 콤보가 그대로 꽂힌다',ashe:'애쉬 R 스턴에 Q·R 후속타는 좋지만, 럭스는 앞라인이 아니라 애쉬가 요구하는 보호를 못 준다. 둘 다 이동기가 없어 다이브에 라인이 통째로 날아감',lucian:'속박으로 만든 창에 초반 폭딜',yunara:'속박으로 프리딜 구도',ezreal:'둘 다 원거리 견제형이라 라인전 안정적'} },
   { k:'자이라', type:'존 컨트롤 · 밴률 40%', s:{ashe:2,twitch:1,ezreal:1,lucian:1,yunara:1,vayne:0,xayah:0,jinx:-1},
     why:{ashe:'둔화 + 속박으로 라인을 얼려버리는 조합 — 공식 시너지로 분류됨',twitch:'식물로 라인 주도권을 만들어준다 (트위치는 이게 전부)',jinx:'자이라도 이동기가 없어 둘 다 물리면 답이 없다'} },
+  { k:'스웨인', type:'딜 · CC 서폿 (메이지)', s:{jhin:2,lucian:2,ashe:1,vayne:1,yunara:1,ezreal:1,twitch:1,jinx:0,xayah:0},
+    why:{jhin:'E 속박이 확정 CC — W 속박과 4번째 탄을 보장한다',lucian:'속박으로 만든 창에 초반 폭딜. 딜을 합쳐 2대2를 터뜨린다',ashe:'앞라인 역할을 해주고 속박 + 둔화가 겹친다',vayne:'속박이 붙어 싸울 시간을 만들어준다',yunara:'속박으로 프리딜 구도. 1~5렙 약한 구간을 Q 견제로 버틴다',ezreal:'둘 다 원거리 견제형이라 라인전이 안정적',jinx:'보호막·회복이 없다. 앞라인은 되지만 물리면 못 빼준다'} },
   { k:'자르반', type:'딜 서폿', s:{lucian:2,ezreal:1,yunara:0,vayne:0,xayah:0,ashe:0,twitch:-1,jinx:-2},
     why:{lucian:'딜을 합쳐 2대2를 터뜨리는 구도',jinx:'보호가 전혀 없어 금지'} },
   { k:'판테온', type:'딜 서폿', s:{lucian:2,ezreal:1,yunara:0,vayne:0,xayah:0,ashe:0,twitch:-1,jinx:-2},
@@ -455,6 +517,8 @@ const E_SUP = [
     why:{ashe:'진입 + 도발에 대시 없는 애쉬는 답이 없다',jinx:'물리면 이동기가 없다',xayah:'R 무적으로 이니시를 흘린다'} },
   { k:'마오카이', s:{ezreal:1,xayah:1,yunara:0,lucian:0,vayne:-1,twitch:-1,ashe:-2,jinx:-2},
     why:{ezreal:'E로 속박을 흘린다',jinx:'속박당하면 이동기가 없어 즉사',ashe:'같은 이유 — 대시가 없다'} },
+  { k:'스웨인', s:{ezreal:1,xayah:1,lucian:0,yunara:0,jhin:-1,ashe:-1,vayne:-1,twitch:-1,jinx:-2},
+    why:{ezreal:'E 속박이 스킬샷이라 비전 이동으로 흘린다',xayah:'R 무적으로 광역 궁을 흘린다',jhin:'재장전 중에 속박 맞으면 그대로 죽는다',jinx:'속박 맞으면 이동기가 없어 그대로 녹는다',ashe:'대시가 없어 속박 + 광역 궁에 답이 없다'} },
   { k:'럭스', s:{ezreal:2,yunara:0,lucian:0,ashe:-1,jinx:-1,vayne:0,xayah:0,twitch:0},
     why:{ezreal:'속박을 E로 회피하고 역킬'} },
   { k:'아리', s:{ezreal:2,yunara:0,lucian:0,ashe:-1,jinx:-1,vayne:0,xayah:0,twitch:0},
@@ -581,88 +645,148 @@ const ICON={'유나라':'Yunara','이즈리얼':'Ezreal','진':'Jhin','루시안
 '룰루':'Lulu','나미':'Nami','잔나':'Janna','카르마':'Karma','밀리오':'Milio','브라움':'Braum','쓰레쉬':'Thresh','레오나':'Leona','노틸러스':'Nautilus','알리스타':'Alistar',
 '갈리오':'Galio','마오카이':'Maokai','라칸':'Rakan','블리츠크랭크':'Blitzcrank','파이크':'Pyke','모르가나':'Morgana','소라카':'Soraka','유미':'Yuumi','세라핀':'Seraphine',
 '럭스':'Lux','자이라':'Zyra','자르반':'JarvanIV','판테온':'Pantheon','세나':'Senna','드레이븐':'Draven','미스포츈':'MissFortune','트리스타나':'Tristana','케이틀린':'Caitlyn',
-'카이사':'Kaisa','바루스':'Varus','사미라':'Samira','칼리스타':'Kalista','코르키':'Corki','스몰더':'Smolder','야스오':'Yasuo','아리':'Ahri'};
+'카이사':'Kaisa','바루스':'Varus','사미라':'Samira','칼리스타':'Kalista','코르키':'Corki','스몰더':'Smolder','야스오':'Yasuo','아리':'Ahri','스웨인':'Swain'};
 const ico=n=>{const id=ICON[(n||'').replace(' ⚠','')]; return id?`<img src="${DD}${id}.png" alt="" loading="lazy" onerror="this.remove()">`:'';};
 const SEL={sup:null,eadc:null,esup:null,tr:new Set(),our:new Set()};
 const BANS=new Set();
+const ALLY=new Array(5).fill(null), ENEMY=new Array(5).fill(null);
+const TRMAN=new Set();
+let MYC=null, target=null, ROSTER=null, BANQ='', ROLE='';
 let BANMAX=6; try{BANMAX=(+localStorage.getItem('wrbanmax'))===10?10:6}catch(_){}
 let BANDONE=false;
 let HINTOFF=false; try{HINTOFF=localStorage.getItem('wrhint')==='0'}catch(_){}
-const MULTI={tr:1,our:1};
 const $=s=>document.querySelector(s);
 const byId=id=>CHAMPS.find(c=>c.id===id);
+const MYPOOL=new Set(CHAMPS.map(c=>c.name));
+const ddId=n=>ICON[n]||n;
 
-const SRC={sup:SUPPORTS,eadc:E_ADC,esup:E_SUP,tr:TRAITS,our:OURS};
-const LBL={sup:s=>s.k,eadc:s=>s.k+(s.ban?' ⚠':''),esup:s=>s.k,tr:t=>t.label,our:o=>o.k};
-const SUB={sup:s=>s.type,eadc:()=>'',esup:()=>'',tr:t=>t.ex,our:o=>o.ex};
-
-const GRID={sup:1,eadc:1,esup:1};
-Object.keys(SRC).forEach(k=>{
-  const el=$('#c-'+k); if(GRID[k]) el.classList.add('grid');
-  el.innerHTML = SRC[k].map((it,i)=>{
-    const lb=LBL[k](it), sb=SUB[k](it);
-    return `<button class="chip" data-k="${k}" data-i="${i}" data-nm="${(it.label||it.k||'').replace(' ⚠','')}" title="${sb||''}">${GRID[k]?ico(it.k):''}<span>${lb}</span>${sb&&!GRID[k]?`<small class="ex">${sb}</small>`:''}</button>`;
-  }).join('');
+/* ── 조합 특성 칩 (자동 판정 + 수동 수정) ── */
+const TRSRC={tr:TRAITS,our:OURS};
+['tr','our'].forEach(k=>{
+  $('#c-'+k).innerHTML=TRSRC[k].map((it,i)=>
+    `<button class="chip" data-t="${k}" data-i="${i}"><span>${it.label||it.k}</span><small class="ex">${it.ex||''}</small></button>`).join('');
 });
 
-/* ── 밴 ── */
-const uniq=a=>[...new Set(a)];
-const BAN_ADC=uniq([...CHAMPS.map(c=>c.name), ...E_ADC.map(x=>x.k)]);
-const BAN_SUP=uniq([...SUPPORTS.map(x=>x.k), ...E_SUP.map(x=>x.k)]);
-const MYPOOL=new Set(CHAMPS.map(c=>c.name));
-const banChips=(el,list)=>{const full=BANS.size>=BANMAX; el.innerHTML=list.map(n=>{
-  const on=BANS.has(n);
-  return `<button class="chip bn${on?' on':''}${MYPOOL.has(n)?' mine':''}${!on&&full?' lock':''}" data-ban="${n}">${ico(n)}<span>${n}</span></button>`;}).join('');};
+/* ── 밴: 전 챔피언 ── */
 function drawBans(){
-  banChips($('#c-ban-adc'),BAN_ADC); banChips($('#c-ban-sup'),BAN_SUP);
+  const el=$('#c-ban'), full=BANS.size>=BANMAX, q=BANQ.trim();
+  if(!ROSTER){ el.innerHTML='<div class="bl">챔프 목록 불러오는 중…</div>'; }
+  else{
+    const list=ROSTER.filter(c=>!q||c.name.includes(q)||c.id.toLowerCase().includes(q.toLowerCase()));
+    el.innerHTML=list.map(c=>{
+      const on=BANS.has(c.name);
+      return `<button class="chip bn${on?' on':''}${MYPOOL.has(c.name)?' mine':''}${!on&&full?' lock':''}" data-ban="${c.name}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`;
+    }).join('') || '<div class="bl">검색 결과가 없다.</div>';
+  }
   document.querySelectorAll('.chip.tg').forEach(b=>b.classList.toggle('on',+b.dataset.max===BANMAX));
-  document.querySelectorAll('.chip[data-nm]').forEach(b=>b.classList.toggle('banned',BANS.has(b.dataset.nm)));
   const cnt=$('#bancnt'); cnt.textContent=`${BANS.size} / ${BANMAX}`;
   cnt.classList.toggle('full',BANS.size>=BANMAX);
-  const el=$('#s-ban'), p=el.querySelector('.pick'), a=[...BANS];
-  el.classList.toggle('done',a.length>0);
-  el.classList.toggle('fin',BANDONE);
-  p.innerHTML = a.length ? `<span class="cnt${BANDONE?' ok':''}">${a.length}/${BANMAX}${BANDONE?' 완료':''}</span>` : '없음';
-  p.classList.toggle('none',!a.length);
+  const st=$('#s-ban'), p=st.querySelector('.pick');
+  st.classList.toggle('done',BANS.size>0); st.classList.toggle('fin',BANDONE);
+  p.innerHTML = BANS.size ? `<span class="cnt${BANDONE?' ok':''}">${BANS.size}/${BANMAX}${BANDONE?' 완료':''}</span>` : '없음';
+  p.classList.toggle('none',!BANS.size);
 }
-document.addEventListener('click',e=>{
-  const t=e.target.closest('.chip.tg');
-  if(t){ BANMAX=+t.dataset.max; try{localStorage.setItem('wrbanmax',BANMAX)}catch(_){}
-    drawBans(); render(); return; }
-  const b=e.target.closest('.chip.bn'); if(!b) return;
-  const n=b.dataset.ban;
-  if(BANS.has(n)) BANS.delete(n);
-  else {
-    if(BANS.size>=BANMAX) return;
-    BANS.add(n);
-    ['sup','eadc','esup'].forEach(k=>{ if(SEL[k]!=null && SRC[k][SEL[k]].k===n){
-      SEL[k]=null; document.querySelectorAll(`.chip[data-k="${k}"]`).forEach(x=>x.classList.remove('on')); } });
-  }
-  BANDONE=false; drawBans(); render();
-});
-$('#bandone').onclick=()=>{ BANDONE=true; $('#s-ban').open=false; drawBans(); render(); scrollTo(0,0); };
-$('#banclr').onclick=()=>{BANS.clear(); BANDONE=false; drawBans(); render();};
 
+/* ── 팀 슬롯 ── */
+const slotHTML=(arr,kind)=>arr.map((c,i)=>
+  `<button class="slot${target&&target.kind===kind&&target.i===i?' sel':''}${c?' on':''}${kind==='a'&&i===0?' me':''}" data-kind="${kind}" data-i="${i}">${c?`<img src="${DD}${c.id}.png" alt=""><b>${c.name}</b>`:(kind==='a'&&i===0?'나':'+')}</button>`).join('');
+
+function setMy(id){
+  MYC = MYC===id ? null : id;
+  if(MYC){ const c=byId(MYC), dd=ddId(c.name);
+    ALLY[0]={...((ROSTER&&ROSTER.find(x=>x.id===dd))||{id:dd,name:c.name,tags:['Marksman'],info:{}}), me:true};
+  } else ALLY[0]=null;
+  target=null; draw();
+}
+
+const ROLES=[['','전체'],['Tank','탱커'],['Fighter','전사'],['Assassin','암살자'],
+  ['Mage','메이지'],['Support','서폿'],['Marksman','원딜']];
+function drawPicker(q){
+  document.querySelectorAll('.pkbox').forEach(b=>b.innerHTML='');
+  if(!target||!ROSTER) return;
+  const box=$(target.kind==='a'?'#pk-a':'#pk-e');
+  const used=new Set([...ALLY,...ENEMY].filter(Boolean).map(c=>c.id));
+  const qq=(q||'').trim();
+  const list=ROSTER.filter(c=>!used.has(c.id)&&!BANS.has(c.name)
+    &&(!ROLE||c.tags.includes(ROLE))
+    &&(!qq||c.name.includes(qq)||c.id.toLowerCase().includes(qq.toLowerCase())));
+  box.innerHTML=`<div class="pick">
+    <div class="roles">${ROLES.map(([k,lb])=>`<button data-r="${k}" class="${ROLE===k?'on':''}">${lb}</button>`).join('')}</div>
+    <input placeholder="${target.kind==='a'?'우리 팀':'상대 팀'} ${target.i+1}번 — 이름으로 찾기" value="${qq}">
+    <div class="cnt">${list.length}명</div>
+    ${list.length?`<div class="grid">${list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')}</div>`
+      :'<div class="empty">조건에 맞는 챔프가 없다. 역할을 바꾸거나 검색어를 지워라.</div>'}</div>`;
+  const inp=box.querySelector('input');
+  inp.oninput=()=>{const v=inp.value; drawPicker(v); const n=box.querySelector('input'); if(n){n.focus(); n.setSelectionRange(v.length,v.length);} };
+  box.querySelectorAll('.roles button').forEach(b=>b.onclick=()=>{ROLE=b.dataset.r; drawPicker(inp.value);});
+  box.querySelectorAll('.grid button').forEach(b=>b.onclick=()=>{
+    const c=ROSTER.find(x=>x.id===b.dataset.id);
+    (target.kind==='a'?ALLY:ENEMY)[target.i]=c; target=null; draw();
+  });
+}
+
+function draw(){
+  $('#as').innerHTML=slotHTML(ALLY,'a');
+  $('#es').innerHTML=slotHTML(ENEMY,'e');
+  document.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{
+    const kind=b.dataset.kind, i=+b.dataset.i, arr=kind==='a'?ALLY:ENEMY;
+    if(kind==='a'&&i===0){ if(MYC) setMy(MYC); return; }
+    if(arr[i]){arr[i]=null; target=null;} else target={kind,i};
+    draw();
+    if(target) setTimeout(()=>{const pk=$('.pkbox .pick'); if(pk) pk.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
+  });
+  $('#mych').innerHTML=CHAMPS.map(c=>`<button data-c="${c.id}" class="${MYC===c.id?'on':''}${BANS.has(c.name)?' dis':''}">${ico(c.name)}<span>${c.name}</span></button>`).join('');
+  $('#mych').querySelectorAll('button').forEach(b=>{ if(!b.classList.contains('dis')) b.onclick=()=>setMy(b.dataset.c); });
+  drawPicker(); drawBans(); render();
+}
+window.onRoster=r=>{ ROSTER=r; draw(); };
+
+/* ── 슬롯 → 서폿·상대·조합 특성 자동 판정 ── */
+function syncAuto(){
+  const al=ALLY.filter(Boolean), en=ENEMY.filter(Boolean);
+  SEL.sup=SEL.eadc=SEL.esup=null;
+  al.forEach((c,i)=>{ if(i===0) return; const k=SUPPORTS.findIndex(x=>x.k===c.name); if(k>=0&&SEL.sup==null) SEL.sup=k; });
+  en.forEach(c=>{
+    const a=E_ADC.findIndex(x=>x.k===c.name); if(a>=0&&SEL.eadc==null) SEL.eadc=a;
+    const sp=E_SUP.findIndex(x=>x.k===c.name); if(sp>=0&&SEL.esup==null) SEL.esup=sp; });
+  let f=null;
+  if(window.WRC){
+    f=WRC.flags(en,al);
+    TRAITS.forEach((t,i)=>{ if(TRMAN.has('tr'+i)) return; f.tr[t.k]?SEL.tr.add(i):SEL.tr.delete(i); });
+    OURS.forEach((o,i)=>{ if(TRMAN.has('our'+i)) return; f.our[o.k]?SEL.our.add(i):SEL.our.delete(i); });
+  }
+  ['tr','our'].forEach(k=>document.querySelectorAll(`.chip[data-t="${k}"]`).forEach(b=>
+    b.classList.toggle('on',SEL[k].has(+b.dataset.i))));
+  return {f,al,en};
+}
+
+/* ── 클릭 ── */
 document.addEventListener('click',e=>{
   if(e.target.id==='hx'){ HINTOFF=true; try{localStorage.setItem('wrhint','0')}catch(_){}
     $('#hint').classList.add('off'); return; }
-  const b=e.target.closest('.chip'); if(!b||b.classList.contains('bn')||b.classList.contains('tg')) return;
-  if(b.classList.contains('banned')) return;
-  const k=b.dataset.k,i=+b.dataset.i;
-  if(MULTI[k]){ SEL[k].has(i)?SEL[k].delete(i):SEL[k].add(i); b.classList.toggle('on'); }
-  else{
-    const same=SEL[k]===i;
-    document.querySelectorAll(`.chip[data-k="${k}"]`).forEach(x=>x.classList.remove('on'));
-    SEL[k]=same?null:i; if(!same){b.classList.add('on'); $('#s-'+k).open=false;}
-  }
-  render();
+  const tg=e.target.closest('.chip.tg');
+  if(tg){ BANMAX=+tg.dataset.max; try{localStorage.setItem('wrbanmax',BANMAX)}catch(_){}
+    drawBans(); render(); return; }
+  const bn=e.target.closest('.chip.bn');
+  if(bn){ const n=bn.dataset.ban;
+    if(BANS.has(n)) BANS.delete(n);
+    else{ if(BANS.size>=BANMAX) return; BANS.add(n);
+      [ALLY,ENEMY].forEach(arr=>arr.forEach((c,i)=>{ if(c&&c.name===n){ arr[i]=null; if(arr===ALLY&&i===0) MYC=null; } }));
+    }
+    BANDONE=false; draw(); return; }
+  const tr=e.target.closest('.chip[data-t]');
+  if(tr){ const k=tr.dataset.t, i=+tr.dataset.i;
+    SEL[k].has(i)?SEL[k].delete(i):SEL[k].add(i); TRMAN.add(k+i); render(); return; }
 });
+$('#bansrch').oninput=e=>{ BANQ=e.target.value; drawBans(); };
+$('#bandone').onclick=()=>{ BANDONE=true; $('#s-ban').open=false; drawBans(); render(); scrollTo(0,0); };
+$('#banclr').onclick=()=>{ BANS.clear(); BANDONE=false; draw(); };
+$('#trauto').onclick=()=>{ TRMAN.clear(); render(); };
 $('#reset').onclick=()=>{
-  SEL.sup=SEL.eadc=SEL.esup=null; SEL.tr.clear(); SEL.our.clear(); BANS.clear(); BANDONE=false;
-  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
-  drawBans();
+  SEL.tr.clear(); SEL.our.clear(); TRMAN.clear(); BANS.clear(); BANDONE=false; MYC=null; target=null; BANQ='';
+  ALLY.fill(null); ENEMY.fill(null); $('#bansrch').value='';
   document.querySelectorAll('.step').forEach(x=>x.open=false);
-  render();
+  draw();
 };
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
@@ -679,8 +803,7 @@ function active(){
   SEL.our.forEach(i=>a.push(['',OURS[i]]));
   return a;
 }
-function evaluate(){
-  const A=active();
+function evaluate(A){
   return CHAMPS.filter(c=>!BANS.has(c.name)).map(c=>{
     let sc=0; const rs=[];
     A.forEach(([pre,src])=>{
@@ -691,55 +814,55 @@ function evaluate(){
     return {c,sc,rs};
   }).sort((a,b)=>b.sc-a.sc||CHAMPS.indexOf(a.c)-CHAMPS.indexOf(b.c));
 }
-
-const STEPS=[['sup','우리 서폿'],['eadc','상대 원딜'],['esup','상대 서폿'],['tr','상대 조합'],['our','우리 조합']];
-function syncSteps(){
-  STEPS.forEach(([k,name])=>{
-    const el=$('#s-'+k), p=el.querySelector('.pick');
-    let html='',has=false;
-    if(MULTI[k]){ const a=[...SEL[k]]; has=a.length>0;
-      html=a.map(i=>`<i>${k==='tr'?TRAITS[i].label:OURS[i].k}</i>`).join(''); }
-    else if(SEL[k]!=null){ has=true; const nm=SRC[k][SEL[k]].k;
-      html=ico(nm)||`<i>${nm}</i>`; }
-    el.classList.toggle('done',has);
-    p.innerHTML = has?html:'미선택'; p.classList.toggle('none',!has);
-  });
+function syncSteps(na,ne){
+  const set=(id,txt,done)=>{const el=$(id),p=el.querySelector('.pick');
+    el.classList.toggle('done',done); p.innerHTML=txt; p.classList.toggle('none',!done);};
+  set('#s-ally', na?`<span class="cnt ok">${na}/5</span>`:'미선택', na>0);
+  set('#s-enemy', ne?`<span class="cnt ok">${ne}/5</span>`:'미선택', ne>0);
+  const nt=SEL.tr.size+SEL.our.size;
+  set('#s-tr', nt?`<span class="cnt ok">${nt}개</span>`:'없음', nt>0);
 }
-function nextHint(){
+function nextHint(na,ne){
   if(!BANDONE && BANS.size===0) return '먼저 <b>밴</b>부터 찍어라. 양 팀 밴을 다 넣고 <b>밴 완료</b>를 누르면 남은 풀에서 추천한다.';
-  const order=[['sup','우리 서폿이 뭔지'],['eadc','상대 원딜'],['esup','상대 서폿'],['tr','상대 조합 특성'],['our','우리 조합 특성']];
-  const left=order.filter(([k])=>MULTI[k]?SEL[k].size===0:SEL[k]==null);
-  if(!left.length) return '입력할 수 있는 건 다 넣었다. 위 추천이 최종 판단.';
-  return `다음에 <b>${left[0][1]}</b>가 정해지면 더 좁혀진다. 모르면 건너뛰어도 됨.`;
+  if(!MYC) return '<b>내 챔프</b>를 고르면 운영 방법과 아이템까지 나온다. 안 골라도 추천은 계속 돌아간다.';
+  if(ne<2) return '<b>상대 팀</b> 칸을 채울수록 추천이 좁혀진다. 픽 되는 대로 하나씩 넣어라.';
+  if(na<5||ne<5) return `우리 ${na}/5 · 상대 ${ne}/5 — 남은 칸을 채우면 조합 특성이 더 정확해진다.`;
+  return '양 팀 다 들어왔다. 위 추천이 최종 판단.';
 }
-
-function drawHint(){
+function drawHint(na,ne){
   const h=$('#hint');
-  h.innerHTML=`<span>${nextHint()}</span><button class="x" id="hx" aria-label="닫기">×</button>`;
+  h.innerHTML=`<span>${nextHint(na,ne)}</span><button class="x" id="hx" aria-label="닫기">×</button>`;
   h.classList.toggle('off',HINTOFF);
 }
 function render(){
-  syncSteps();
-  const A=active(), list=evaluate();
+  const {f,al,en}=syncAuto();
+  const na=al.length, ne=en.length;
+  syncSteps(na,ne);
+  const A=active(), list=evaluate(A);
+  const me=MYC?byId(MYC):null;
   const warn = SEL.eadc!=null && E_ADC[SEL.eadc].ban ? E_ADC[SEL.eadc] : null;
+  const adv = (window.WRC&&f&&ne>=2)?WRC.advice(en,al,me,f):'';
 
-  /* 1픽 / 정보 없음 */
+  if(!list.length){
+    $('#hero').innerHTML=`<div class="hero badbox"><div class="lbl">밴</div>
+      <div class="big" style="font-size:18px">내 풀이 전부 밴당했다</div>
+      <div class="sub">밴 목록에서 하나 이상 풀어라.</div></div>`;
+    drawHint(na,ne); $('#rank').innerHTML=''; return;
+  }
+
+  /* 정보가 하나도 없을 때 = 1픽 */
   $('#p-pick').classList.toggle('blind',!A.length);
   if(!A.length){
     const WHY={}; BLIND.forEach(x=>WHY[x.id]=x.why);
     const pref=BLIND.map(x=>byId(x.id)).filter(Boolean);
     const b=[...pref,...CHAMPS.filter(c=>pref.indexOf(c)<0)]
       .filter(c=>!BANS.has(c.name)).map(c=>({c,why:WHY[c.id]||c.strength}));
-    if(!b.length){ $('#hero').innerHTML=`<div class="hero badbox"><div class="lbl">밴</div>
-      <div class="big" style="font-size:18px">내 풀이 전부 밴당했다</div>
-      <div class="sub">밴 목록에서 하나 이상 풀어라.</div></div>`;
-      drawHint(); $('#rank').innerHTML=''; return; }
     const nb=BANS.size;
     $('#hero').innerHTML = `<div class="hero"><div class="lbl">${nb?`밴 ${nb}개 반영 · 남은 풀에서 1픽`:'1픽 · 정보 없을 때'}</div>
       <div class="big">${ico(b[0].c.name)}<span>${b[0].c.name}</span><em>${b[0].c.tier}</em></div>
       <div class="sub">${b[0].why}</div>
       <div class="alts"><b>대안</b>${b.slice(1,3).map(x=>`<span>${ico(x.c.name)}${x.c.name}</span>`).join('')}</div></div>`;
-    drawHint();
+    drawHint(na,ne);
     $('#rank').innerHTML = `<h3>${nb?`밴 후 남은 내 풀 ${b.length}명`:'1픽 후보 근거'}</h3>` + b.map((x,i)=>`<div class="row">
       <div class="rk">${i+1}</div><div class="mid">
       <div class="nm">${ico(x.c.name)}${x.c.name}<span class="tier">${x.c.tier}</span></div>
@@ -747,15 +870,9 @@ function render(){
     return;
   }
 
-  if(!list.length){
-    $('#hero').innerHTML=`<div class="hero badbox"><div class="lbl">밴</div>
-      <div class="big" style="font-size:18px">내 풀이 전부 밴당했다</div>
-      <div class="sub">밴 목록에서 하나 이상 풀어라.</div></div>`;
-    drawHint(); $('#rank').innerHTML=''; return;
-  }
   const top=list[0], best=top.sc;
   const ties=list.filter(r=>r.sc===best&&best>0);
-  let cls='hero', lbl='추천', sub='';
+  let cls='hero', lbl=`추천${ne?` · 상대 ${ne}명 반영`:''}`, sub='';
   if(best<=-1){ cls='hero badbox'; lbl='이 상황에 좋은 픽이 없음';
     sub='점수가 전부 마이너스다. 아래 1위가 그나마 덜 나쁜 선택이고, 밴이 가능하면 상대 픽을 자르는 게 낫다.'; }
   else if(best===0){ cls='hero warnbox'; lbl='뚜렷한 답이 없음';
@@ -773,9 +890,9 @@ function render(){
       <div class="sub">${sub}</div>
       ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${ico(t.c.name)}${t.c.name}</span>`).join('')}</div>`:''}
     </div>`;
-  drawHint();
+  drawHint(na,ne);
 
-  $('#rank').innerHTML = `<h3>전체 순위</h3>` + list.map((r,i)=>`
+  $('#rank').innerHTML = adv + `<h3>전체 순위</h3>` + list.map((r,i)=>`
     <div class="row${r.sc<=-2?' no':''}">
       <div class="rk">${i+1}</div>
       <div class="mid"><div class="nm">${ico(r.c.name)}${r.c.name}<span class="tier">${r.c.tier}</span></div>
@@ -816,8 +933,7 @@ $('#champs').innerHTML = CHAMPS.map(c=>`<div class="cd">
   <div class="stat">${c.wr!=='—'?`승률 ${c.wr} · 픽률 ${c.pick} · 밴률 ${c.ban} · `:''}근거: ${c.src}</div>
 </div>`).join('');
 
-drawBans();
-render();
+draw();
 </script>
 <script src="comp.js"></script>
 </body></html>
