@@ -283,7 +283,7 @@ const SUPPORTS = [
     why:{jinx:'보호형이라 징크스 조건 충족'} },
   { k:'유미', type:'엔챈터', s:{ezreal:2,yunara:1,jinx:1,vayne:1,ashe:0,lucian:0,xayah:0,twitch:1}, why:{} },
   { k:'세라핀', type:'포킹 · 유틸', s:{ezreal:1,yunara:1,jinx:1,ashe:1,xayah:0,vayne:0,lucian:0,twitch:0}, why:{} },
-  { k:'룩스', type:'포킹 · CC', s:{ezreal:1,lucian:1,yunara:1,ashe:1,jinx:1,xayah:0,vayne:0,twitch:0}, why:{} },
+  { k:'럭스', type:'포킹 · CC', s:{ezreal:1,lucian:1,yunara:1,ashe:1,jinx:1,xayah:0,vayne:0,twitch:0}, why:{} },
   { k:'자이라', type:'존 컨트롤 · 밴률 40%', s:{ashe:2,twitch:1,ezreal:1,lucian:1,yunara:1,vayne:0,xayah:0,jinx:-1},
     why:{ashe:'둔화 + 속박으로 라인을 얼려버리는 조합 — 공식 시너지로 분류됨',twitch:'식물로 라인 주도권을 만들어준다 (트위치는 이게 전부)',jinx:'자이라도 이동기가 없어 둘 다 물리면 답이 없다'} },
   { k:'자르반', type:'딜 서폿', s:{lucian:2,ezreal:1,yunara:0,vayne:0,xayah:0,ashe:0,twitch:-1,jinx:-2},
@@ -297,7 +297,7 @@ const SUPPORTS = [
 const E_ADC = [
   { k:'애쉬', ban:true, s:{yunara:-2,ezreal:-2,lucian:-2,vayne:-1,jinx:-1,xayah:-1,twitch:-1,ashe:0},
     why:{yunara:'유나라 하드 카운터',ezreal:'빠른 라인클리어로 이즈를 밀어붙인다',lucian:'사거리가 더 길어 루시안을 괴롭힌다',xayah:'사거리 길고 CC 있음'},
-    note:'네 풀 전체가 구조적으로 불리 — 밴 1순위. 굳이 고르면 자야.' },
+    note:'네 풀이 성장형 위주라 구조적으로 불리 — 밴 1순위. 대안은 자야, 아니면 애쉬 미러(유불리 없음).' },
   { k:'드레이븐', ban:true, s:{yunara:-2,ezreal:-2,vayne:-1,jinx:-2,xayah:0,twitch:-2,lucian:0,ashe:0},
     why:{ezreal:'강한 라인전으로 이즈 성장을 방해',jinx:'초반 압박에 징크스가 무너짐'},
     note:'라인전 최강급. 밴 후보.' },
@@ -353,7 +353,7 @@ const E_SUP = [
     why:{ashe:'진입형 암살자에 애쉬는 대응이 안 된다',xayah:'들어오는 적을 받아치기 좋다',ezreal:'E로 회피'} },
   { k:'자이라', s:{ezreal:1,xayah:1,yunara:0,lucian:0,vayne:-1,ashe:-1,jinx:-2,twitch:-1},
     why:{ezreal:'E로 속박을 흘린다',xayah:'R 무적으로 궁 회피',jinx:'속박 + 광역딜에 이동기 없는 징크스가 녹는다'} },
-  { k:'룩스', s:{ezreal:2,yunara:0,lucian:0,ashe:-1,jinx:-1,vayne:0,xayah:0,twitch:0},
+  { k:'럭스', s:{ezreal:2,yunara:0,lucian:0,ashe:-1,jinx:-1,vayne:0,xayah:0,twitch:0},
     why:{ezreal:'속박을 E로 회피하고 역킬'} },
   { k:'아리', s:{ezreal:2,yunara:0,lucian:0,ashe:-1,jinx:-1,vayne:0,xayah:0,twitch:0},
     why:{ezreal:'매혹을 E로 회피하고 역킬'} },
@@ -479,6 +479,7 @@ function evaluate(){
       sc+=v; const w=src.why?.[c.id];
       if(v!==0||w) rs.push({v,t:`<b>${pre}${src.label||src.k}</b>${w?' — '+w:''}`});
     });
+    if(SEL.eadc!=null && E_ADC[SEL.eadc].k===c.name) rs.push({v:0,t:'<b>미러전</b> — 유불리 없음, 숙련도 싸움'});
     return {c,sc,rs};
   }).sort((a,b)=>b.sc-a.sc||CHAMPS.indexOf(a.c)-CHAMPS.indexOf(b.c));
 }
@@ -521,8 +522,11 @@ function render(){
     return;
   }
 
-  const top=list[0], best=top.sc;
-  const ties=list.filter(r=>r.sc===best&&best>0);
+  const mirName = SEL.eadc!=null ? E_ADC[SEL.eadc].k : null;
+  const nonMir = list.filter(r=>r.c.name!==mirName);
+  const mirRow = mirName ? list.find(r=>r.c.name===mirName) : null;
+  const top=(nonMir[0]||list[0]), best=top.sc;
+  const ties=nonMir.filter(r=>r.sc===best&&best>0);
   let cls='hero', lbl='추천', sub='';
   if(best<=-1){ cls='hero badbox'; lbl='이 상황에 좋은 픽이 없음';
     sub='점수가 전부 마이너스다. 아래 1위가 그나마 덜 나쁜 선택이고, 밴이 가능하면 상대 픽을 자르는 게 낫다.'; }
@@ -540,6 +544,7 @@ function render(){
       <div class="big">${top.c.name}<em>${top.c.tier}</em></div>
       <div class="sub">${sub}</div>
       ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${t.c.name}</span>`).join('')}</div>`:''}
+      ${mirRow?`<div class="alts"><b>미러</b><span>${mirRow.c.name} ${mirRow.sc>0?'+':''}${mirRow.sc}</span></div>`:''}
     </div>`;
   $('#hint').innerHTML = nextHint();
 
