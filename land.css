@@ -159,3 +159,6 @@
 @media (orientation:landscape) and (min-height:541px){
   .wrap{max-width:720px}
 }
+
+/* ── 전역(가로·세로 공통): 더블탭 확대 끄기. 핀치 줌과 스크롤은 그대로 ── */
+html,body,*{touch-action:manipulation}
