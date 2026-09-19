@@ -83,16 +83,17 @@
   /* ── 조합 분석: 좌 슬롯 · 중 챔프검색 · 우 결과 ── */
   #p-cmp.on{display:grid;gap:8px;align-items:start;
     grid-template-columns:minmax(0,1fr) minmax(0,.85fr) minmax(0,1.15fr);
-    grid-template-rows:auto auto auto auto auto 1fr;
     max-height:calc(100dvh - 62px);overflow:hidden}
   #p-cmp>h3{grid-column:1;margin:3px 0 4px;font-size:10px}
   #es,#as{grid-column:1}
   #p-cmp .slots{gap:4px}
-  #picker{grid-column:2;grid-row:1/-1}
+  #picker{grid-column:2;grid-row:1/span 20}
   #picker:empty{display:none}
   #picker:empty + #cout{grid-column:2/-1}
-  #cout{grid-column:3;grid-row:1/-1;max-height:calc(100dvh - 66px);overflow-y:auto}
-  #p-cmp .note{grid-column:1;grid-row:5;font-size:9.5px;margin-top:4px;line-height:1.45}
+  #cout{grid-column:3;grid-row:1/span 20;max-height:calc(100dvh - 66px);overflow-y:auto}
+  #p-cmp .note{grid-column:1;font-size:9.5px;margin-top:4px;line-height:1.45}
+  #mych{grid-column:1;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:4px}
+  #mych span{font-size:7.5px}
   #p-cmp .slot{border-radius:9px}
   #p-cmp .slot b{font-size:7.5px}
   #p-cmp .pick{margin-top:0;padding:7px;border-radius:10px}
