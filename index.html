@@ -473,7 +473,7 @@ function evaluate(){
     A.forEach(([pre,src])=>{
       const v=src.s?.[c.id]; if(v===undefined) return;
       sc+=v; const w=src.why?.[c.id];
-      if(v!==0||w) rs.push({v,t:`<b>${pre}${src.k||src.label}</b>${w?' — '+w:''}`});
+      if(v!==0||w) rs.push({v,t:`<b>${pre}${src.label||src.k}</b>${w?' — '+w:''}`});
     });
     return {c,sc,rs};
   }).sort((a,b)=>b.sc-a.sc||CHAMPS.indexOf(a.c)-CHAMPS.indexOf(b.c));
@@ -555,8 +555,8 @@ function render(){
   const on={},off={}; CHAMPS.forEach(c=>{on[c.id]=[];off[c.id]=[];});
   const push=(src,pre)=>src.forEach(x=>CHAMPS.forEach(c=>{
     const v=x.s?.[c.id];
-    if(v>=2) on[c.id].push(pre+(x.k||x.label));
-    else if(v<=-2) off[c.id].push(pre+(x.k||x.label));
+    if(v>=2) on[c.id].push(pre+(x.label||x.k));
+    else if(v<=-2) off[c.id].push(pre+(x.label||x.k));
   }));
   push(SUPPORTS,'우리 '); push(E_ADC,'상대 '); push(E_SUP,'상대폿 '); push(TRAITS,''); push(OURS,'');
   $('#sheet').innerHTML = CHAMPS.map(c=>`<tr>
