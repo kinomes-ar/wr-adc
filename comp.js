@@ -107,6 +107,10 @@ document.head.appendChild(el(`<style>
 #mych button.on img{border-color:var(--good2);filter:none}
 #mych span{display:block;font-size:9px;color:var(--dim);margin-top:3px;line-height:1.1;font-weight:600}
 #mych button.on span{color:var(--tx)}
+.adv .nm.top{font-size:16px;margin-bottom:2px}
+.slot.me{border-color:var(--good2);border-style:solid}
+.slot.me:after{content:'나';position:absolute;top:2px;left:3px;font-size:8px;font-weight:800;
+ color:#fff;background:var(--good);border-radius:4px;padding:0 3px;line-height:1.4}
 .adv h4 .me{font-size:10px;font-weight:700;color:var(--dim2);margin-left:6px}
 .adv .sub{font-size:10.5px;color:var(--dim2);margin-top:7px;line-height:1.5}
 </style>`));
@@ -116,9 +120,9 @@ const nav=document.querySelector('nav');
 const btn=el('<button data-p="cmp">조합 분석</button>'); nav.appendChild(btn);
 const panel=el('<section class="panel cmp" id="p-cmp"></section>');
 document.querySelector('#p-champ').after(panel);
-panel.innerHTML=`<h3>상대 팀 5명</h3><div class="slots" id="es"></div>
-<h3>우리 팀 5명 (나 포함)</h3><div class="slots ally" id="as"></div>
-<h3>내 챔프</h3><div id="mych"></div>
+panel.innerHTML=`<h3>우리 팀 5명 (나 포함)</h3><div class="slots ally" id="as"></div>
+<h3>내 챔프 — 고르면 우리 팀 1번 칸에 들어간다</h3><div id="mych"></div>
+<h3>상대 팀 5명</h3><div class="slots" id="es"></div>
 <div id="picker"></div><div id="cout"></div>
 <div class="note">챔프 분류는 Riot Data Dragon에서 실시간으로 받아온다. 추천 원딜은 픽 찾기 탭과 같은 점수 엔진을 쓰되, 조합 특성을 자동으로 판정한다.</div>`;
 nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
@@ -143,18 +147,31 @@ async function load(){
   LOADING=false; draw();
 }
 
+/* 내 챔프 = 우리 팀 1번 칸 */
+function setMy(id){
+  const off = MYC===id;
+  MYC = off ? null : id;
+  if(AS[0] && !AS[0].me){ const free=AS.findIndex((x,i)=>i>0&&!x); if(free>0) AS[free]=AS[0]; AS[0]=null; }
+  if(MYC){
+    const c=CHAMPS.find(x=>x.id===MYC), dd=ICON[c.name]||c.id;
+    const r=(ROSTER&&ROSTER.find(x=>x.id===dd))||{id:dd,name:c.name,tags:['Marksman'],info:{}};
+    AS[0]={...r, me:true};
+  } else if(AS[0]&&AS[0].me) AS[0]=null;
+  target=null; draw(); analyze();
+  if(!off) setTimeout(()=>{const o=$$('#cout'); if(o&&o.firstChild) o.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
+}
+
 function draw(){
-  const mk=(arr,kind)=>arr.map((c,i)=>`<button class="slot${target&&target.kind===kind&&target.i===i?' sel':''}${c?' on':''}" data-kind="${kind}" data-i="${i}">${c?`<img src="${DD}${c.id}.png" alt=""><b>${c.name}</b>`:'+'}</button>`).join('');
+  const mk=(arr,kind)=>arr.map((c,i)=>`<button class="slot${target&&target.kind===kind&&target.i===i?' sel':''}${c?' on':''}${c&&c.me?' me':''}" data-kind="${kind}" data-i="${i}">${c?`<img src="${DD}${c.id}.png" alt=""><b>${c.name}</b>`:'+'}</button>`).join('');
   $$('#es').innerHTML=mk(ES,'e'); $$('#as').innerHTML=mk(AS,'a');
   panel.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{
     const kind=b.dataset.kind, i=+b.dataset.i, arr=kind==='e'?ES:AS;
+    if(kind==='a'&&i===0&&AS[0]&&AS[0].me){ setMy(MYC); return; }
     if(arr[i]){arr[i]=null; target=null;} else target={kind,i};
     draw(); analyze();
   });
   $$('#mych').innerHTML=CHAMPS.map(c=>`<button data-c="${c.id}" class="${MYC===c.id?'on':''}">${ico(c.name)}<span>${c.name}</span></button>`).join('');
-  $$('#mych').querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    MYC = MYC===b.dataset.c ? null : b.dataset.c; draw(); analyze();
-  });
+  $$('#mych').querySelectorAll('button').forEach(b=>b.onclick=()=>setMy(b.dataset.c));
   drawPicker();
 }
 function drawPicker(q){
@@ -229,7 +246,7 @@ function analyze(){
 
   /* ── 추천 카드 ── */
   let html=`<div class="adv"><h4>이 조합에 추천</h4>
-    <div class="nm" style="font-size:17px">${ico(top.c.name)}${top.c.name}<span class="tier">${top.c.tier}</span></div>
+    <div class="nm top">${ico(top.c.name)}${top.c.name}<span class="tier">${top.c.tier}</span></div>
     ${top.rs.length?`<ul style="margin-top:7px">${top.rs.map(r=>`<li class="${r.v>0?'g':'w'}">${r.t}</li>`).join('')}</ul>`:''}
     <ul style="margin-top:6px">${scores.slice(1,4).map(x=>`<li>${x.c.name} ${x.sc>0?'+':''}${x.sc}</li>`).join('')}</ul>
     <div class="sub">${stat}</div>
