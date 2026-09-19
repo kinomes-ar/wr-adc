@@ -80,30 +80,38 @@
   .cd .tag{font-size:10px;margin:2px 0 7px}
   .cd dl{grid-template-columns:38px 1fr;gap:4px 7px;font-size:10.5px}
 
-  /* ── 조합 분석: 좌 슬롯 · 중 챔프검색 · 우 결과 ── */
-  #p-cmp.on{display:grid;gap:8px;align-items:start;
-    grid-template-columns:minmax(0,1fr) minmax(0,.85fr) minmax(0,1.15fr);
+  /* ── 조합 분석: 좌 입력 레일 · 중 챔프검색 · 우 결과(다단) ── */
+  #p-cmp.on{display:grid;gap:9px;align-items:start;
+    grid-template-columns:232px auto minmax(0,1fr);
     max-height:calc(100dvh - 62px);overflow:hidden}
-  #p-cmp>h3{grid-column:1;margin:3px 0 4px;font-size:10px}
+  #p-cmp>h3{grid-column:1;margin:1px 0 4px;font-size:9.5px}
   #es,#as{grid-column:1}
   #p-cmp .slots{gap:4px}
-  #picker{grid-column:2;grid-row:1/span 20}
+  #p-cmp #mych{grid-column:1;grid-template-columns:repeat(5,1fr);gap:4px}
+  #p-cmp #mych span{font-size:7.5px;margin-top:2px}
+  #p-cmp #mych img{border-width:1.5px}
+  #p-cmp .note{display:none}
+
+  #picker{grid-column:2;grid-row:1/span 30;width:216px}
   #picker:empty{display:none}
-  #picker:empty + #cout{grid-column:2/-1}
-  #cout{grid-column:3;grid-row:1/span 20;max-height:calc(100dvh - 66px);overflow-y:auto}
-  #p-cmp .note{grid-column:1;font-size:9.5px;margin-top:4px;line-height:1.45}
-  #mych{grid-column:1;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:4px}
-  #mych span{font-size:7.5px}
+
+  #cout{grid-column:3;grid-row:1/span 30;
+    max-height:calc(100dvh - 62px);overflow-y:auto;overscroll-behavior:contain;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));
+    gap:9px;align-content:start}
+  #cout::-webkit-scrollbar{width:0}
+
   #p-cmp .slot{border-radius:9px}
   #p-cmp .slot b{font-size:7.5px}
   #p-cmp .pick{margin-top:0;padding:7px;border-radius:10px}
   #p-cmp .pick input{padding:6px 9px;font-size:12px;margin-bottom:6px}
   #p-cmp .pick .grid{grid-template-columns:repeat(auto-fill,minmax(42px,1fr));
-    max-height:calc(100dvh - 128px);gap:4px}
+    max-height:calc(100dvh - 118px);gap:4px}
   #p-cmp .pick button span{font-size:7.5px}
-  #p-cmp .adv{margin-top:0;margin-bottom:6px;padding:9px 10px;border-radius:10px}
+  #p-cmp .adv{margin:0;padding:9px 10px;border-radius:10px}
   #p-cmp .adv h4{font-size:11px;margin-bottom:5px}
   #p-cmp .adv li{font-size:10.5px;margin-bottom:4px;line-height:1.5}
+  #p-cmp .adv .sub{font-size:9.5px;margin-top:5px}
 
   .ftr{display:none}
   #p-sheet.on{max-height:calc(100dvh - 62px);overflow-y:auto}
