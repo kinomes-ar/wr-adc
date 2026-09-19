@@ -107,6 +107,8 @@
 
   .ftr{display:none}
   #p-sheet.on{max-height:calc(100dvh - 62px);overflow-y:auto}
+  /* 패널 자체가 스크롤 컨테이너라 헤더는 top:0 기준 (세로모드는 nav 높이만큼 내림) */
+  #p-sheet th{top:0}
   #p-sheet .ftr{display:block;margin-top:10px;padding-top:8px;font-size:9px}
   table{font-size:10.5px}
   td{padding:6px 4px}
