@@ -105,6 +105,22 @@ td.g{color:#8FD8AB;font-weight:600}td.r{color:#E39B9B;font-weight:600}
 .cd ul{margin:0;padding-left:15px}
 .cd .wn{color:var(--bad);font-weight:700}
 .stat{font-size:10px;color:var(--dim2);margin-top:9px;border-top:1px solid var(--line2);padding-top:7px}
+/* ── 챔프 아이콘 ── */
+.chips.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:7px}
+.chips.grid .chip{display:flex;flex-direction:column;align-items:center;gap:4px;
+ padding:7px 2px 6px;border-radius:12px;font-size:10px;text-align:center;line-height:1.15;white-space:normal}
+.chips.grid .chip img{width:42px;height:42px;border-radius:50%;object-fit:cover;display:block;
+ border:2px solid #2A3342;filter:saturate(.5) brightness(.78)}
+.chips.grid .chip.on img{border-color:#5EE698;filter:none}
+.chips.grid .chip small{display:none}
+.nm{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.nm img{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #2A3342;flex:0 0 auto}
+.hero .big{display:flex;align-items:center;gap:11px}
+.hero .big img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #2E5C42;flex:0 0 auto}
+.alts span img{width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:-5px;margin-right:5px}
+.cd h4{display:flex;align-items:center;gap:8px}
+.cd h4 img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid #2A3342}
+td.c img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block;margin-bottom:3px}
 .ftr{margin-top:18px;font-size:10px;color:#4E5766;line-height:1.7;border-top:1px solid var(--line2);padding-top:11px}
 </style>
 </head>
@@ -483,6 +499,13 @@ _jp(OURS, {'우리팀에 이니시·탱커 있음':2,'우리팀에 CC가 거의 
  j.src='유튜브 공략(구버전 영상 — 매치업만 반영) + 통계 7.2e';
 })();
 
+const DD='https://ddragon.leagueoflegends.com/cdn/16.18.1/img/champion/';
+const ICON={'유나라':'Yunara','이즈리얼':'Ezreal','진':'Jhin','루시안':'Lucian','애쉬':'Ashe','베인':'Vayne','징크스':'Jinx','자야':'Xayah','트위치':'Twitch',
+'룰루':'Lulu','나미':'Nami','잔나':'Janna','카르마':'Karma','밀리오':'Milio','브라움':'Braum','쓰레쉬':'Thresh','레오나':'Leona','노틸러스':'Nautilus','알리스타':'Alistar',
+'갈리오':'Galio','마오카이':'Maokai','라칸':'Rakan','블리츠크랭크':'Blitzcrank','파이크':'Pyke','모르가나':'Morgana','소라카':'Soraka','유미':'Yuumi','세라핀':'Seraphine',
+'럭스':'Lux','자이라':'Zyra','자르반':'JarvanIV','판테온':'Pantheon','세나':'Senna','드레이븐':'Draven','미스포츈':'MissFortune','트리스타나':'Tristana','케이틀린':'Caitlyn',
+'카이사':'Kaisa','바루스':'Varus','사미라':'Samira','칼리스타':'Kalista','코르키':'Corki','스몰더':'Smolder','야스오':'Yasuo','아리':'Ahri'};
+const ico=n=>{const id=ICON[(n||'').replace(' ⚠','')]; return id?`<img src="${DD}${id}.png" alt="" loading="lazy" onerror="this.remove()">`:'';};
 const SEL={sup:null,eadc:null,esup:null,tr:new Set(),our:new Set()};
 const MULTI={tr:1,our:1};
 const $=s=>document.querySelector(s);
@@ -492,10 +515,12 @@ const SRC={sup:SUPPORTS,eadc:E_ADC,esup:E_SUP,tr:TRAITS,our:OURS};
 const LBL={sup:s=>s.k,eadc:s=>s.k+(s.ban?' ⚠':''),esup:s=>s.k,tr:t=>t.label,our:o=>o.k};
 const SUB={sup:s=>s.type,eadc:()=>'',esup:()=>'',tr:t=>t.ex,our:o=>o.ex};
 
+const GRID={sup:1,eadc:1,esup:1};
 Object.keys(SRC).forEach(k=>{
-  $('#c-'+k).innerHTML = SRC[k].map((it,i)=>{
-    const sb=SUB[k](it);
-    return `<button class="chip" data-k="${k}" data-i="${i}">${LBL[k](it)}${sb?`<small class="ex">${sb}</small>`:''}</button>`;
+  const el=$('#c-'+k); if(GRID[k]) el.classList.add('grid');
+  el.innerHTML = SRC[k].map((it,i)=>{
+    const lb=LBL[k](it), sb=SUB[k](it);
+    return `<button class="chip" data-k="${k}" data-i="${i}" title="${sb||''}">${GRID[k]?ico(it.k):''}<span>${lb}</span>${sb&&!GRID[k]?`<small class="ex">${sb}</small>`:''}</button>`;
   }).join('');
 });
 
@@ -572,13 +597,13 @@ function render(){
   if(!A.length){
     const b=BLIND.map(x=>({c:byId(x.id),why:x.why}));
     $('#hero').innerHTML = `<div class="hero"><div class="lbl">1픽 · 정보 없을 때</div>
-      <div class="big">${b[0].c.name}<em>${b[0].c.tier}</em></div>
+      <div class="big">${ico(b[0].c.name)}<span>${b[0].c.name}</span><em>${b[0].c.tier}</em></div>
       <div class="sub">${b[0].why}</div>
-      <div class="alts"><b>대안</b>${b.slice(1).map(x=>`<span>${x.c.name}</span>`).join('')}</div></div>`;
+      <div class="alts"><b>대안</b>${b.slice(1).map(x=>`<span>${ico(x.c.name)}${x.c.name}</span>`).join('')}</div></div>`;
     $('#hint').innerHTML = nextHint();
     $('#rank').innerHTML = `<h3>1픽 후보 근거</h3>` + b.map((x,i)=>`<div class="row">
       <div class="rk">${i+1}</div><div class="mid">
-      <div class="nm">${x.c.name}<span class="tier">${x.c.tier}</span></div>
+      <div class="nm">${ico(x.c.name)}${x.c.name}<span class="tier">${x.c.tier}</span></div>
       <div class="rs"><div>${x.why}</div></div></div></div>`).join('');
     return;
   }
@@ -602,17 +627,17 @@ function render(){
        <div class="big" style="font-size:19px">상대 ${warn.k}</div>
        <div class="sub">${warn.note}</div></div>`:'') +
     `<div class="${cls}"><div class="lbl">${lbl}</div>
-      <div class="big">${top.c.name}<em>${top.c.tier}</em></div>
+      <div class="big">${ico(top.c.name)}<span>${top.c.name}</span><em>${top.c.tier}</em></div>
       <div class="sub">${sub}</div>
-      ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${t.c.name}</span>`).join('')}</div>`:''}
-      ${mirRow?`<div class="alts"><b>미러</b><span>${mirRow.c.name} ${mirRow.sc>0?'+':''}${mirRow.sc}</span></div>`:''}
+      ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${ico(t.c.name)}${t.c.name}</span>`).join('')}</div>`:''}
+      ${mirRow?`<div class="alts"><b>미러</b><span>${ico(mirRow.c.name)}${mirRow.c.name} ${mirRow.sc>0?'+':''}${mirRow.sc}</span></div>`:''}
     </div>`;
   $('#hint').innerHTML = nextHint();
 
   $('#rank').innerHTML = `<h3>전체 순위</h3>` + list.map((r,i)=>`
     <div class="row${r.sc<=-2?' no':''}">
       <div class="rk">${i+1}</div>
-      <div class="mid"><div class="nm">${r.c.name}<span class="tier">${r.c.tier}</span></div>
+      <div class="mid"><div class="nm">${ico(r.c.name)}${r.c.name}<span class="tier">${r.c.tier}</span></div>
       ${r.rs.length?`<div class="rs">${r.rs.map(x=>
         `<div class="${x.v>0?'p':x.v<0?'m':''}">${x.v>0?'＋':x.v<0?'－':'·'} ${x.t}</div>`).join('')}</div>`:''}
       </div>
@@ -630,14 +655,14 @@ function render(){
   }));
   push(SUPPORTS,'우리 '); push(E_ADC,'상대 '); push(E_SUP,'상대폿 '); push(TRAITS,''); push(OURS,'');
   $('#sheet').innerHTML = CHAMPS.map(c=>`<tr>
-    <td class="c">${c.name}<br><span style="font-size:9px;color:var(--warn);font-weight:700">${c.tier}</span></td>
+    <td class="c">${ico(c.name)}${c.name}<br><span style="font-size:9px;color:var(--warn);font-weight:700">${c.tier}</span></td>
     <td class="g">${on[c.id].join(' · ')||'—'}</td>
     <td class="r">${off[c.id].join(' · ')||'—'}</td></tr>`).join('');
 })();
 
 /* 챔프 상세 */
 $('#champs').innerHTML = CHAMPS.map(c=>`<div class="cd">
-  <h4>${c.name}<span class="tier">${c.tier}</span></h4><div class="tag">${c.tag}</div>
+  <h4>${ico(c.name)}<span>${c.name}</span><span class="tier">${c.tier}</span></h4><div class="tag">${c.tag}</div>
   <dl><dt>핵심</dt><dd>${c.core}</dd><dt>강점</dt><dd>${c.strength}</dd><dt>약점</dt><dd>${c.weak}</dd>
   <dt>스펠</dt><dd>${c.spell}</dd><dt>빌드</dt><dd>${c.build}</dd><dt>룬</dt><dd>${c.runes}</dd>
   <dt>콤보</dt><dd><ul>${c.combo.map(x=>`<li>${x}</li>`).join('')}</ul></dd>
