@@ -52,6 +52,44 @@ function flags(en,al){
   };
 }
 
+/* ── 라인별 판정 — 슬롯이 라인 순서(탑·정글·미드·원딜·서폿)로 고정돼 있다 ── */
+const SUPC={
+ hook:['Blitzcrank','Thresh','Nautilus','Pyke'],
+ eng :['Leona','Alistar','Rakan','Rell','Galio','Maokai','Braum','Amumu','Sett','Nunu','Zac'],
+ poke:['Lux','Zyra','Morgana','Brand','Xerath','Swain','Senna','Velkoz','Ziggs'],
+ ench:['Soraka','Yuumi','Nami','Lulu','Milio','Janna','Sona','Taric','Ivern','Karma','Seraphine']};
+const JGANK=['LeeSin','Elise','Khazix','Rengar','XinZhao','JarvanIV','Nunu','Warwick','Vi','Hecarim',
+ 'Kayn','Evelynn','Shaco','Diana','Olaf','Sejuani','Amumu','Graves','Nidalee','Zac','Lillia','Viego','Talon','Jax'];
+const MROAM=['Ahri','TwistedFate','Galio','Pantheon','Zed','Talon','Katarina','Fizz','Akali','Diana',
+ 'AurelionSol','Lissandra','Nocturne','Yone','Yasuo','Ekko'];
+const TDIVE=['Malphite','Ornn','Sion','Kennen','Gnar','Camille','Shen','JarvanIV','Renekton','Irelia','Riven','Jax','Darius','Fiora'];
+const supCat=c=>{ if(!c) return null; for(const k in SUPC) if(SUPC[k].includes(c.id)) return k; return null; };
+
+function laneCard(me){
+  const U=window.WRUI; if(!U||!U.ENEMY) return '';
+  const A=U.ALLY, E=U.ENEMY, D=window.WRDB, n=c=>c?c.name:'';
+  const et=E[0], ej=E[1], em=E[2], ea=E[3], es=E[4], as=A[4];
+  const li=[];
+  if(ea||es) li.push(`<li><b>상대 바텀</b> ${[n(ea),n(es)].filter(Boolean).join(' + ')} <span style="color:var(--dim2)">vs</span> ${me?me.name:'나'}${as?' + '+n(as):''}</li>`);
+  if(me&&ea&&D&&D.T[ea.name]) li.push(`<li class="g"><b>${n(ea)} 상대</b> ${D.T[ea.name][1]}</li>`);
+  const ec=supCat(es);
+  if(ec==='hook') li.push(`<li class="w"><b>${n(es)} 훅</b> — 미니언 뒤에 서고 부시 쪽에서 CS 먹지 마라. 훅 한 번 빠지면 그 몇 초가 우리 턴이다</li>`);
+  if(ec==='eng')  li.push(`<li class="w"><b>${n(es)} 이니시</b> — 점멸 없을 땐 라인 반만 밀어라. 들어오는 순간 뒤로 빼면서 폿부터 잘라라</li>`);
+  if(ec==='poke') li.push(`<li class="w"><b>${n(es)} 포킹</b> — 체력 60% 밑이면 이미 물릴 각이다. 물약 아끼지 말고 라인 당겨서 받아라</li>`);
+  if(ec==='ench') li.push(`<li><b>${n(es)} 보호·회복</b> — 길어지면 진다. 2렙 선취해서 초반에 체력 깎고, 치유 감소는 최대한 빨리 올려라</li>`);
+  const ac=supCat(as);
+  if(ac==='ench') li.push(`<li class="g"><b>우리 ${n(as)}</b> — 받쳐주는 폿이다. 평소보다 반 발 앞에서 딜해도 되고 2:2도 받아도 된다</li>`);
+  else if(ac==='hook'||ac==='eng') li.push(`<li class="g"><b>우리 ${n(as)}</b> — 이니시형. 폿이 들어가면 바로 따라 들어가라. 내가 먼저 앞서면 폿이 못 받쳐준다</li>`);
+  else if(ac==='poke') li.push(`<li class="g"><b>우리 ${n(as)}</b> — 견제형. 체력 깎아놓고 들어가는 그림이다. 폿이 견제할 때 같이 평타 넣어라</li>`);
+  else if(!as) li.push(`<li>우리 서폿 칸을 채우면 라인전 톤까지 잡아준다</li>`);
+  if(ej) li.push(JGANK.includes(ej.id)
+    ? `<li class="w"><b>상대 정글 ${n(ej)}</b> — 초반 바텀 갱이 센 챔프다. 3렙 전에 라인 밀지 말고 강 쪽 와드부터 박아라</li>`
+    : `<li><b>상대 정글 ${n(ej)}</b> — 초반 갱보다 오브젝트 위주. 대신 드래곤 타이밍에 바텀으로 인원이 몰린다</li>`);
+  if(em&&MROAM.includes(em.id)) li.push(`<li class="w"><b>상대 미드 ${n(em)}</b> — 로밍이 잦다. 미드가 시야에서 사라지면 바로 뒤로 빼라</li>`);
+  if(et&&TDIVE.includes(et.id)) li.push(`<li><b>상대 탑 ${n(et)}</b> — 한타에서 나를 직접 노리고 들어온다. 점멸·생존기 아껴 둬라</li>`);
+  return li.length?`<div class="adv"><h4>라인전 — 바텀 2:2 · 로밍 대비</h4><ul>${li.join('')}</ul></div>`:'';
+}
+
 /* 추천 원딜(me) 기준: 내 빌드 · 상대별 대응 · 스펠 — adv.js(WRDB)를 쓴다 */
 const ord=['tank','heal','ap','ad','cc','shield','group','poke'];
 const ORDL={tank:'상대 탱커 2명 이상',heal:'상대에 회복·흡혈',ap:'상대 AP 비중 높음',
@@ -86,6 +124,9 @@ function advice(en,al,me,f){
       <li>${bd.ln}</li>
       <li class="w"><b>약점</b> ${me.weak}</li></ul></div>`;
   }
+
+  /* 1.5) 라인별 — 바텀 2:2 와 로밍 */
+  html+=laneCard(me);
 
   /* 2) 상대 5명 개별 대응 */
   if(D){
