@@ -725,7 +725,12 @@ function fillPicker(box,q){
   g.querySelectorAll('button').forEach(b=>{
     const go=e=>{ e.preventDefault();
       const c=ROSTER.find(x=>x.id===b.dataset.id); if(!c) return;
-      (target.kind==='a'?ALLY:ENEMY)[target.i]=c; target=null; draw(); };
+      const kind=target.kind, arr=kind==='a'?ALLY:ENEMY;
+      arr[target.i]=c;
+      /* 한 명 넣을 때마다 닫지 않고 다음 빈 칸으로 넘어간다 */
+      let nx=-1; for(let i=(kind==='a'?1:0);i<5;i++){ if(!arr[i]){nx=i;break;} }
+      target = nx>=0 ? {kind,i:nx} : null;
+      draw(); };
     b.addEventListener('pointerdown',go);
     b.addEventListener('click',e=>e.preventDefault());
   });
@@ -767,6 +772,13 @@ function draw(){
   drawPicker(); drawBans(); render();
 }
 window.onRoster=r=>{ ROSTER=r; draw(); };
+/* 외부 스크립트(comp.js 등)에서 UI 상태를 다룰 수 있게 노출 */
+window.WRUI={ALLY,ENEMY,BANS,SEL,TRMAN,CHAMPS,DD,draw,drawBans,drawPicker,fillPicker,render,
+  get target(){return target}, set target(v){target=v},
+  get ROSTER(){return ROSTER}, get ROLE(){return ROLE}, set ROLE(v){ROLE=v},
+  get MYC(){return MYC}, set MYC(v){MYC=v},
+  get BANMAX(){return BANMAX}, set BANMAX(v){BANMAX=v},
+  get BANDONE(){return BANDONE}, set BANDONE(v){BANDONE=v}};
 
 /* ── 슬롯 → 서폿·상대·조합 특성 자동 판정 ── */
 function syncAuto(){
@@ -908,6 +920,7 @@ function render(){
     const r=top.rs.filter(x=>x.v>0&&x.t.includes('—'));
     sub = r.length ? r.map(x=>x.t.replace(/<\/?b>/g,'')).join(' · ') : top.c.strength;
   }
+  }
   $('#hero').innerHTML =
     (warn?`<div class="hero warnbox"><div class="lbl">경고</div>
        <div class="big" style="font-size:19px">상대 ${warn.k}</div>
@@ -918,7 +931,6 @@ function render(){
       ${ties.length>1?`<div class="alts"><b>동점</b>${ties.slice(1).map(t=>`<span>${ico(t.c.name)}${t.c.name}</span>`).join('')}</div>`:''}
     </div>`;
   drawHint(na,ne);
-
   $('#rank').innerHTML = adv + `<h3>전체 순위</h3>` + list.map((r,i)=>`
     <div class="row${r.sc<=-2?' no':''}">
       <div class="rk">${i+1}</div>
