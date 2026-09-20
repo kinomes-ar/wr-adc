@@ -140,7 +140,58 @@ function advice(en,al,me,f){
 .adv .enh i.sp{background:#1B2830;border-color:#27414E;color:#9CC9DC}
 .adv .en ul{margin:0}
 .adv .en li{margin-bottom:3px}
+/* 밴 진행 중 실시간 목록 */
+#banmirror{margin:2px 0 4px}
+#banmirror .bl span{color:var(--bad2);font-weight:800}
+.bmlist{display:flex;flex-wrap:wrap;gap:5px}
+.bmlist .bm{display:flex;align-items:center;gap:5px;padding:3px 8px 3px 3px;border-radius:18px;
+ border:1px solid var(--bad);background:#1B2830;color:#9CC9DC;font-family:inherit;font-size:11.5px;font-weight:700}
+.bmlist .bm img{width:22px;height:22px;border-radius:50%;object-fit:cover;
+ filter:grayscale(1) brightness(.6);display:block}
+.bmlist .bm span{text-decoration:line-through}
+.bmlist .bm i{font-style:normal;font-size:13px;color:var(--dim2);line-height:1;margin-left:1px}
 `; document.head.appendChild(st);})();
+
+/* ── 밴 단계에서 지금까지 밴된 챔프를 실시간으로 보여준다 (탭하면 해제) ── */
+(()=>{
+  const cban=document.querySelector('#c-ban'), srch=document.querySelector('#bansrch');
+  if(!cban) return;
+  const wrap=document.createElement('div'); wrap.id='banmirror';
+  wrap.innerHTML='<div class="bl">지금 밴됨 <span></span></div><div class="bmlist"></div>';
+  cban.parentNode.insertBefore(wrap,cban);
+  const lab=wrap.querySelector('span'), list=wrap.querySelector('.bmlist');
+  const S=new Map();
+  const esc=n=>(window.CSS&&CSS.escape)?CSS.escape(n):n.replace(/"/g,'\\"');
+  function sync(){
+    cban.querySelectorAll('.chip.bn').forEach(c=>{
+      const n=c.dataset.ban, img=c.querySelector('img');
+      if(c.classList.contains('on')) S.set(n,img?img.src:''); else S.delete(n);
+    });
+    const t=(document.querySelector('#bancnt')||{}).textContent||'';
+    const m=t.match(/(\d+)/); if(m&&+m[1]===0) S.clear();
+    wrap.style.display=S.size?'block':'none';
+    lab.textContent=t.trim();
+    list.innerHTML=[...S].map(([n,src])=>
+      `<button class="bm" data-n="${n}">${src?`<img src="${src}" alt="">`:''}<span>${n}</span><i>×</i></button>`).join('');
+  }
+  list.addEventListener('pointerdown',e=>{
+    const b=e.target.closest('.bm'); if(!b) return; e.preventDefault();
+    const n=b.dataset.n, sel='.chip.bn[data-ban="'+esc(n)+'"]';
+    const hit=cban.querySelector(sel);
+    if(hit){ hit.click(); return; }
+    /* 검색어에 가려져 있으면 잠깐 풀고 해제한다 */
+    const keep=srch.value;
+    srch.value=n; srch.dispatchEvent(new Event('input',{bubbles:true}));
+    setTimeout(()=>{ const h2=cban.querySelector(sel); if(h2) h2.click();
+      S.delete(n);
+      srch.value=keep; srch.dispatchEvent(new Event('input',{bubbles:true}));
+      sync(); },0);
+  });
+  new MutationObserver(()=>sync()).observe(cban,
+    {childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  document.addEventListener('click',()=>setTimeout(sync,0));
+  sync();
+})();
 window.WRC={HEAL,CC,IMMOBILE,flags,advice};
 
 /* 실전 DB(adv.js)를 동적으로 불러온다 — index.html은 손대지 않는다 */
