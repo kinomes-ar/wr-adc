@@ -709,6 +709,7 @@ const ROLES=[['','전체'],['Tank','탱커'],['Fighter','전사'],['Assassin','�
   ['Mage','메이지'],['Support','서폿'],['Marksman','원딜']];
 /* 검색창은 다시 그리지 않는다 — 다시 그리면 한글 IME 조합이 끊겨 자모가 분리된다 */
 function fillPicker(box,q){
+  if(!box||!box.querySelector('.lst')) return;   /* 이미 닫힌 목록이면 무시 */
   const used=new Set([...ALLY,...ENEMY].filter(Boolean).map(c=>c.id));
   const qq=(q||'').trim();
   const list=ROSTER.filter(c=>!used.has(c.id)&&!BANS.has(c.name)
@@ -719,9 +720,14 @@ function fillPicker(box,q){
   g.innerHTML=list.length
     ? list.map(c=>`<button data-id="${c.id}"><img src="${DD}${c.id}.png" alt="" loading="lazy"><span>${c.name}</span></button>`).join('')
     : '조건에 맞는 챔프가 없다. 역할을 바꾸거나 검색어를 지워라.';
-  g.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    const c=ROSTER.find(x=>x.id===b.dataset.id);
-    (target.kind==='a'?ALLY:ENEMY)[target.i]=c; target=null; draw();
+  /* 선택은 pointerdown에서 처리한다 — click 직전에 목록이 다시 그려지면
+     손가락 밑의 챔프가 바뀌어 엉뚱한 챔프가 들어가기 때문 (한글 조합 확정 타이밍) */
+  g.querySelectorAll('button').forEach(b=>{
+    const go=e=>{ e.preventDefault();
+      const c=ROSTER.find(x=>x.id===b.dataset.id); if(!c) return;
+      (target.kind==='a'?ALLY:ENEMY)[target.i]=c; target=null; draw(); };
+    b.addEventListener('pointerdown',go);
+    b.addEventListener('click',e=>e.preventDefault());
   });
 }
 function drawPicker(q){
@@ -735,10 +741,9 @@ function drawPicker(q){
     <div class="lst grid"></div></div>`;
   const inp=box.querySelector('input');
   inp.value=q||'';
-  let composing=false;
-  inp.addEventListener('compositionstart',()=>{composing=true;});
-  inp.addEventListener('compositionend',()=>{composing=false; fillPicker(box,inp.value);});
-  inp.addEventListener('input',()=>{ if(!composing) fillPicker(box,inp.value); });
+  /* 입력창 자체는 절대 다시 그리지 않는다(한글 조합 깨짐). 목록만 즉시 갱신 */
+  inp.addEventListener('input',()=>fillPicker(box,inp.value));
+  inp.addEventListener('compositionend',()=>fillPicker(box,inp.value));
   box.querySelectorAll('.roles button').forEach(b=>b.onclick=()=>{
     ROLE=b.dataset.r;
     box.querySelectorAll('.roles button').forEach(x=>x.classList.toggle('on',x.dataset.r===ROLE));
