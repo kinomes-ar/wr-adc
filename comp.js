@@ -235,9 +235,82 @@ function advice(en,al,me,f){
 })();
 window.WRC={HEAL,CC,IMMOBILE,flags,advice};
 
+/* ── 카이사를 내 풀에 추가 (Wild Rift 7.2e — WildRiftFire·Wild Rift Core 근거) ──
+   index.html의 전역 데이터(CHAMPS·SUPPORTS·E_ADC·E_SUP·TRAITS·OURS)에 런타임으로 합친다 */
+const KAISA_B={b:'광전사의 군화',c:["자성 발사기","구인수의 격노검","종결자(Terminus)"],l:["루난의 허리케인","몰락한 왕의 검","크라켄 학살자"],
+ r:'치명적 속도 / 잔혹 / 최후의 일격 / 전설: 핏줄 / 뼈 방패',sp:'점멸 + 유체화',
+ sk:'Q(이케시아 폭우) → E(과충전) → W(공허추적자). 진화도 Q → E → W 순',
+ ln:'1코어(4분 전후) 전까지는 파밍만. W로 플라즈마를 쌓고 평타로 5스택을 터뜨려라. 아군 CC가 걸린 적에게 R로 바로 붙는 게 카이사의 전부다.',
+ s:{tank:'몰락한 왕의 검 + 종결자 — 공속·방관으로 녹인다',heal:'필멸자의 운명',ap:'맬모셔스의 아귀',
+  ad:'수호 천사 — R 진입 후 받아칠 시간을 번다',cc:'수은의 검 — R로 들어가서 묶이면 끝이다',
+  shield:'독사의 송곳니',group:'루난의 허리케인 — 한타 광역딜',poke:'라인 당겨 받고 1코어까지 참아라'}};
+(()=>{ try{
+  if(typeof CHAMPS==='undefined'||CHAMPS.some(c=>c.id==='kaisa')) return;
+  CHAMPS.push({ id:'kaisa', name:'카이사', tier:'B', wr:'48.9%', pick:'12.0%', ban:'0.3%',
+    tag:'진입형 · 후반 캐리 · 하이브리드',
+    core:'패시브 플라즈마 5스택이 터지면 잃은 체력 비례 폭딜. 아이템을 올리면 Q·E·W가 진화한다.',
+    strength:'2코어 + 진화 후 중반이 강하다. 아군 CC가 걸린 적에게 R로 바로 붙어 폭딜을 넣는다.',
+    weak:'초반 사거리가 짧아 라인전이 약하다. 혼자 잡히면 빠질 수단이 R뿐이다.',
+    spell:'점멸 + 유체화',
+    build:'자성 발사기 → 구인수의 격노검 → 종결자 → 루난의 허리케인 / 몰락한 왕의 검',
+    runes:'치명적 속도 / 잔혹 / 최후의 일격 / 전설: 핏줄 / 뼈 방패',
+    combo:['W(공허추적자)로 플라즈마 2스택 → 평타로 5스택 폭발','아군 CC 뒤 R 진입 → Q 난사','E 과충전으로 공속·이속 올려 카이팅'],
+    tip:'Q는 주변에 적이 하나뿐이면 전부 그 한 명에게 몰린다 — 고립된 적을 노려라. R은 진입기이자 탈출기다. 초반 강한 원딜(케이틀린·드레이븐) 상대로는 라인 당겨서 버텨라.',
+    src:'통계(Wild Rift Core 7.2e) + WildRiftFire 7.2e 가이드' });
+  if(typeof MYPOOL!=='undefined') MYPOOL.add('카이사');
+  const put=(arr,map,why)=>arr.forEach(x=>{const k=x.k||x.label;
+    if(map[k]!==undefined){ x.s.kaisa=map[k]; if(why&&why[k]){ x.why=x.why||{}; x.why.kaisa=why[k]; } } });
+  put(SUPPORTS,{'룰루':2,'나미':1,'잔나':1,'카르마':1,'밀리오':1,'브라움':1,'쓰레쉬':1,'레오나':2,'노틸러스':2,'알리스타':2,
+    '갈리오':2,'마오카이':2,'라칸':2,'블리츠크랭크':1,'파이크':1,'모르가나':1,'소라카':0,'유미':1,'세라핀':0,'럭스':1,
+    '자이라':0,'스웨인':1,'자르반':1,'판테온':1,'세나':0},
+   {'룰루':'공식 시너지 — 공속 버프·변이로 진입을 받쳐준다','노틸러스':'공식 시너지 — 확정 CC 뒤 R로 바로 붙는다',
+    '알리스타':'공식 시너지 — 띄운 적에게 R 진입 폭딜','레오나':'CC가 걸리면 R로 따라 들어가 끝낸다',
+    '갈리오':'도발 + 궁 합류가 카이사 R 진입과 겹친다','마오카이':'속박 걸린 적에게 R 진입 — 공식 추천 팀원'});
+  put(E_ADC,{'애쉬':-1,'드레이븐':-2,'미스포츈':-1,'트리스타나':-1,'케이틀린':-2,'진':0,'이즈리얼':0,'카이사':0,
+    '바루스':0,'사미라':0,'칼리스타':-2,'베인':0,'징크스':0,'루시안':-1,'유나라':0,'코르키':0,'트위치':1,'스몰더':0,'자야':0,'세나':0},
+   {'케이틀린':'하드 카운터 — 사거리 차이로 라인전 내내 두들겨 맞는다','드레이븐':'초반 압박에 카이사가 1코어 전에 무너진다',
+    '칼리스타':'하드 카운터 — 초반 딜교에서 진다','트위치':'짧은 사거리끼리면 카이사 폭딜이 먼저 들어간다'});
+  put(E_SUP,{'브라움':-1,'야스오':-1,'블리츠크랭크':-1,'알리스타':-1,'레오나':-1,'쓰레쉬':-1,'노틸러스':-1,'파이크':0,
+    '자이라':-1,'갈리오':-1,'마오카이':-1,'스웨인':-1,'럭스':-1,'아리':0,'모르가나':0,'나미':-1,'룰루':-1,'소라카':0,'세라핀':-1},
+   {'룰루':'R로 들어가는 순간 변이에 끊긴다','브라움':'방어막이 Q 미사일을 다 먹는다'});
+  put(TRAITS,{'dive':0,'tank':1,'poke':-1,'teamfight':0,'cc':-1,'immobile':2,'earlypress':-2,'scaling':0},
+   {'immobile':'이동기 없는 적에게 R로 붙어 한 명씩 지운다','earlypress':'1코어 전 라인전이 약하다',
+    'tank':'패시브·구인수 온힛으로 탱커를 녹인다','poke':'사거리가 짧아 포킹에 깎인다'});
+  put(OURS,{'우리팀에 이니시·탱커 있음':2,'우리팀에 CC가 거의 없음':-2,'우리팀이 초반에 강함':0,'우리팀이 후반 조합':1,'우리팀에 암살자·다이브 있음':2},
+   {'우리팀에 이니시·탱커 있음':'아군 CC가 카이사 R 진입의 전제 조건이다','우리팀에 CC가 거의 없음':'R로 들어갈 각이 안 나온다',
+    '우리팀에 암살자·다이브 있음':'같이 뒷라인으로 파고든다'});
+
+  /* 치트시트·챔프 상세는 index.html이 처음에 한 번만 그리므로 다시 그린다 */
+  const CATS=[[SUPPORTS,'폿'],[E_ADC,'적딜'],[E_SUP,'적폿'],[TRAITS,'조합'],[OURS,'아군']];
+  const on={},off={}; CHAMPS.forEach(c=>{on[c.id]={};off[c.id]={};});
+  CATS.forEach(([src,cat])=>src.forEach(x=>CHAMPS.forEach(c=>{
+    const v=x.s?.[c.id]; if(v===undefined) return;
+    const nm=(x.label||x.k).replace(' ⚠','');
+    if(v>=2)(on[c.id][cat]=on[c.id][cat]||[]).push(nm);
+    else if(v<=-2)(off[c.id][cat]=off[c.id][cat]||[]).push(nm);
+  })));
+  const fmt=o=>{const ks=CATS.map(x=>x[1]).filter(k=>o[k]);
+    return ks.length?ks.map(k=>`<div class="cg"><i>${k}</i>${o[k].map(n=>`<em>${n}</em>`).join('')}</div>`).join(''):'—';};
+  const sh=document.querySelector('#sheet');
+  if(sh) sh.innerHTML=`<thead><tr><th>챔프</th><th class="g">◎ 이럴 때 고른다</th><th class="r">✕ 이럴 때 피한다</th></tr></thead><tbody>`
+    + CHAMPS.map(c=>`<tr><td class="c">${ico(c.name)}${c.name}<br><span style="font-size:9px;color:var(--warn);font-weight:700">${c.tier}</span></td>
+    <td class="g">${fmt(on[c.id])}</td><td class="r">${fmt(off[c.id])}</td></tr>`).join('')+'</tbody>';
+  const cd=document.querySelector('#champs');
+  if(cd) cd.innerHTML=CHAMPS.map(c=>`<div class="cd">
+  <h4>${ico(c.name)}<span>${c.name}</span><span class="tier">${c.tier}</span></h4><div class="tag">${c.tag}</div>
+  <dl><dt>핵심</dt><dd>${c.core}</dd><dt>강점</dt><dd>${c.strength}</dd><dt>약점</dt><dd>${c.weak}</dd>
+  <dt>스펠</dt><dd>${c.spell}</dd><dt>빌드</dt><dd>${c.build}</dd><dt>룬</dt><dd>${c.runes}</dd>
+  <dt>콤보</dt><dd><ul>${c.combo.map(x=>`<li>${x}</li>`).join('')}</ul></dd>
+  ${c.tip?`<dt>팁</dt><dd>${c.tip}</dd>`:''}${c.warn?`<dt>주의</dt><dd class="wn">${c.warn}</dd>`:''}</dl>
+  <div class="stat">${c.wr!=='—'?`승률 ${c.wr} · 픽률 ${c.pick} · 밴률 ${c.ban} · `:''}근거: ${c.src}</div>
+</div>`).join('');
+  if(typeof draw==='function') draw();
+ }catch(e){ console.warn('kaisa',e); } })();
+
 /* 실전 DB(adv.js)를 동적으로 불러온다 — index.html은 손대지 않는다 */
 (()=>{const s=document.createElement('script'); s.src='adv.js?v=1'; s.async=true;
-  s.onload=()=>{ if(window.render) try{window.render()}catch(_){} };
+  s.onload=()=>{ if(window.WRDB&&!WRDB.B.kaisa) WRDB.B.kaisa=KAISA_B;
+    if(window.render) try{window.render()}catch(_){} };
   document.head.appendChild(s);})();
 
 /* 전 챔피언 로스터 — 밴 목록과 팀 슬롯이 이걸 쓴다 */
