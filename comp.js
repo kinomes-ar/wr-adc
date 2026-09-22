@@ -19,6 +19,10 @@ Lucian:'Marksman',Twitch:'Marksman',Yunara:'Marksman',Kalista:'Marksman',Corki:'
 const HEAL=['Soraka','Yuumi','Nami','DrMundo','Senna','Seraphine','Milio','Taric','Aatrox','Swain','Warwick','Sylas','Vladimir','Zac','Volibear','Fiddlesticks'];
 const CC=['Leona','Nautilus','Alistar','Maokai','Galio','Thresh','Blitzcrank','Morgana','Lux','Zyra','Amumu','Malphite','Sejuani','Ornn','Rammus','Ahri','Pyke','Rakan','Janna','Seraphine','Orianna'];
 
+/* 광역 이니시 궁 — 한 명만 있어도 한타에서 원딜을 통째로 묶는다 (에어본은 수은으로도 못 푼다) */
+const AOEULT=['Malphite','Amumu','Ornn','Sejuani','Maokai','Galio','Orianna','Zac','MonkeyKing','Kennen','JarvanIV',
+ 'Gragas','Rakan','Diana','Seraphine','Lissandra','Leona','Nautilus','Rell','Alistar'];
+
 /* 이동기가 없어 잡히면 끝나는 챔프 */
 const IMMOBILE=['Garen','Nasus','Darius','Annie','Soraka','Veigar','DrMundo','Malphite','Ashe','Jinx','Zyra','Lux','Swain','Seraphine','Sion','Yuumi','Nami','Janna'];
 
@@ -39,16 +43,17 @@ function flags(en,al){
   const ccN=en.filter(c=>CC.includes(c.id)).length;
   const heal=en.filter(c=>HEAL.includes(c.id)).length;
   const immob=en.filter(c=>IMMOBILE.includes(c.id)).length;
+  const aoe=en.filter(c=>AOEULT.includes(c.id)).map(c=>c.name);
   const alTank=has(al,'Tank'), alAss=has(al,'Assassin');
   const alHeal=al.filter(c=>HEAL.includes(c.id)).length;
   const alCC=al.filter(c=>CC.includes(c.id)).length;
   const alEng=al.filter(c=>CC.includes(c.id)&&c.tags.includes('Tank')).length;
   return {
-    tr:{dive:ass>=2, tank:tanks>=2, cc:ccN>=3, immobile:immob>=2},
+    tr:{dive:ass>=2, tank:tanks>=2, cc:ccN>=3, immobile:immob>=2, aoeult:aoe.length>=1},
     our:{'우리팀에 이니시·탱커 있음':alEng>=1||alTank>=2,
          '우리팀에 CC가 거의 없음':al.length>=3&&alCC===0,
          '우리팀에 암살자·다이브 있음':alAss>=1},
-    st:{tanks,ass,ap,ad,ccN,heal,alTank,alHeal,alEng,alCC}
+    st:{tanks,ass,ap,ad,ccN,heal,alTank,alHeal,alEng,alCC,aoe}
   };
 }
 
@@ -155,6 +160,7 @@ function advice(en,al,me,f){
 
   /* 4) 한타 포지셔닝 */
   const p=[];
+  if(f.tr.aoeult) p.push(`<li class="w"><b>${s.aoe.join('·')} 광역 궁</b> — 아군이랑 일렬로 붙지 마라. 궁 빠진 걸 확인하기 전엔 싸움 열지 마라. 에어본은 수은으로 못 푼다 → 수호 천사를 빨리</li>`);
   if(f.tr.dive) p.push(`<li class="w">암살자 ${s.ass}명 — 점멸·생존기가 살아 있을 때만 싸워라. 사이드 혼자 가지 마라</li>`);
   if(f.tr.tank) p.push(`<li>탱커 ${s.tanks}명 — 앞라인 억지로 녹이지 말고 넘어오는 딜러부터 잘라라</li>`);
   if(s.ccN>=3) p.push(`<li class="w">CC ${s.ccN}개 — 한 번 걸리면 연계로 끝난다. 아군보다 반 발 뒤에서 딜해라</li>`);
@@ -233,7 +239,21 @@ function advice(en,al,me,f){
   document.addEventListener('click',()=>setTimeout(sync,0));
   sync();
 })();
-window.WRC={HEAL,CC,IMMOBILE,flags,advice};
+window.WRC={HEAL,CC,IMMOBILE,AOEULT,flags,advice};
+
+/* ── 조합 특성 추가: 광역 이니시 궁 (말파·아무무·오른 …) — 한 명만 있어도 걸린다 ── */
+(()=>{ try{
+  if(typeof TRAITS==='undefined'||TRAITS.some(t=>t.k==='aoeult')) return;
+  TRAITS.push({ k:'aoeult', label:'광역 이니시 궁 있음', ex:'말파이트 아무무 오른 세주아니 갈리오',
+    s:{xayah:2,ezreal:2,kaisa:1,smolder:1,twitch:-1,vayne:-2,lucian:-1,yunara:-2,jhin:-2,ashe:-2,jinx:-2},
+    why:{xayah:'R 무적으로 궁을 그대로 흘린다',ezreal:'착지하자마자 E로 후속 연계를 피한다',
+      kaisa:'착지 후 R·E로 빠질 수 있다',smolder:'착지 후 E 비행으로 지형 넘어 도망',
+      yunara:'이동기가 초월 E뿐 — 궁 맞으면 연계에 그대로 죽는다',jhin:'이동기 없음 — 재장전 중에 궁 맞으면 끝',
+      ashe:'대시가 없다',jinx:'이동기가 없다',vayne:'Q 구르기 하나로는 연계를 못 피한다',
+      lucian:'사거리가 짧아 궁 범위 안에 같이 들어간다'} });
+  const box=document.querySelector('#c-tr'), i=TRAITS.length-1, t=TRAITS[i];
+  if(box) box.insertAdjacentHTML('beforeend',`<button class="chip" data-t="tr" data-i="${i}"><span>${t.label}</span><small class="ex">${t.ex}</small></button>`);
+ }catch(e){ console.warn('aoeult',e); } })();
 
 /* ── 카이사를 내 풀에 추가 (Wild Rift 7.2e — WildRiftFire·Wild Rift Core 근거) ──
    index.html의 전역 데이터(CHAMPS·SUPPORTS·E_ADC·E_SUP·TRAITS·OURS)에 런타임으로 합친다 */
