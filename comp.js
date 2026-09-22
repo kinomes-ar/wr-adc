@@ -245,7 +245,7 @@ window.WRC={HEAL,CC,IMMOBILE,AOEULT,flags,advice};
 (()=>{ try{
   if(typeof TRAITS==='undefined'||TRAITS.some(t=>t.k==='aoeult')) return;
   TRAITS.push({ k:'aoeult', label:'광역 이니시 궁 있음', ex:'말파이트 아무무 오른 세주아니 갈리오',
-    s:{xayah:2,ezreal:2,kaisa:1,smolder:1,twitch:-1,vayne:-2,lucian:-1,yunara:-2,jhin:-2,ashe:-2,jinx:-2},
+    s:{xayah:3,ezreal:3,kaisa:2,smolder:1,twitch:-1,vayne:-3,lucian:-1,yunara:-3,jhin:-3,ashe:-3,jinx:-3},
     why:{xayah:'R 무적으로 궁을 그대로 흘린다',ezreal:'착지하자마자 E로 후속 연계를 피한다',
       kaisa:'착지 후 R·E로 빠질 수 있다',smolder:'착지 후 E 비행으로 지형 넘어 도망',
       yunara:'이동기가 초월 E뿐 — 궁 맞으면 연계에 그대로 죽는다',jhin:'이동기 없음 — 재장전 중에 궁 맞으면 끝',
